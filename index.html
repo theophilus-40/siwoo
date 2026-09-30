@@ -1,1305 +1,969 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tomb Raider: Relic Runner - Ultimate Escape</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      background-color: #0b090a;
-      font-family: 'Rajdhani', sans-serif;
-      user-select: none;
-      overflow: hidden;
-    }
-    .pixel-font {
-      font-family: 'Press Start 2P', cursive;
-    }
-    canvas {
-      image-rendering: pixelated;
-      box-shadow: 0 0 35px rgba(217, 119, 6, 0.3);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>숙-쓱 :: 스마트 학원 숙제 & 168 BGM 리포트</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        },
+                        accent: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-active {
+            background-color: #ffffff !important;
+            border-color: #10b981 !important;
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.15), 0 8px 10px -6px rgba(16, 185, 129, 0.1) !important;
+        }
+        @keyframes dangerPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.04); }
+        }
+        .danger-pulse {
+            animation: dangerPulse 0.8s infinite ease-in-out;
+        }
+    </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen text-white p-2 sm:p-4">
+<body class="text-slate-800 min-h-screen flex flex-col justify-between selection:bg-brand-100 selection:text-brand-700 pb-28">
 
-  <div class="w-full max-w-4xl flex flex-col items-center">
-    <!-- Top Bar / Title -->
-    <div class="w-full flex justify-between items-center mb-2 px-2">
-      <div class="flex items-center space-x-2">
-        <span class="text-2xl sm:text-3xl font-bold text-amber-500 tracking-wider">TOMB RUNNER</span>
-        <span class="hidden sm:inline text-xs bg-amber-900/60 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded">Royal Vault Challenge</span>
-      </div>
-      <div id="modeBadge" class="pixel-font text-xs sm:text-sm px-3 py-1.5 rounded-md bg-amber-600/30 border border-amber-400 text-amber-300">
-        MODE: PARKOUR RUN
-      </div>
-    </div>
-
-    <!-- Canvas Container -->
-    <div class="relative w-full aspect-[16/9] max-h-[70vh] rounded-xl overflow-hidden border-2 border-amber-600/50 bg-black shadow-2xl">
-      <canvas id="gameCanvas" class="w-full h-full block"></canvas>
-
-      <!-- HUD Overlay -->
-      <div id="hud" class="absolute top-0 left-0 right-0 p-3 sm:p-4 flex justify-between items-start pointer-events-none pixel-font text-xs sm:text-sm text-yellow-400">
-        <div class="flex flex-col gap-2">
-          <div id="heartsContainer" class="flex gap-1 text-red-500 text-lg sm:text-xl drop-shadow">❤️❤️❤️</div>
-          <div class="bg-black/60 backdrop-blur px-2 py-1 rounded border border-amber-500/30">
-            SCORE: <span id="scoreText" class="text-white">00000</span>
-          </div>
-          <!-- Parkour Distance Progress Bar -->
-          <div id="parkourProgressBar" class="hidden bg-black/70 border border-amber-500/40 px-2 py-1 rounded w-36 sm:w-48">
-            <div class="text-[10px] text-amber-300 mb-0.5 flex justify-between">
-              <span>VAULT PROGRESS</span>
-              <span id="distText">0m / 3500m</span>
+    <!-- Top Header Bar -->
+    <header class="bg-white border-b border-slate-200/80 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-brand-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
+                    <i class="fa-solid fa-check-double text-xl"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-black text-2xl text-slate-900 tracking-tight">숙-쓱</h1>
+                        <span class="bg-brand-500 text-white text-[11px] px-2.5 py-0.5 rounded-full font-extrabold tracking-wide">168</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-medium hidden sm:block">일주일 168시간을 지배하는 스마트 클래식 BGM 플래너</p>
+                </div>
             </div>
-            <div class="w-full bg-amber-950 h-2 rounded overflow-hidden">
-              <div id="distFill" class="bg-amber-500 h-full w-0 transition-all"></div>
+            
+            <div class="flex items-center gap-3">
+                <!-- BGM Status Quick Button -->
+                <button onclick="toggleAudioEngine()" class="flex items-center gap-2 text-xs px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition shadow-sm">
+                    <i id="headerBgmIcon" class="fa-solid fa-music text-brand-500"></i>
+                    <span id="headerBgmText" class="font-bold text-slate-700">BGM: 재생하기</span>
+                </button>
+
+                <span id="headerTotalBadge" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold bg-slate-100 text-slate-600 px-3 py-2 rounded-xl">
+                    <i class="fa-solid fa-layer-group text-brand-500"></i>
+                    등록된 숙제 <span id="headerTaskCount" class="text-brand-600 font-extrabold">0</span>개
+                </span>
             </div>
-          </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
+
+        <!-- LARGE PROMINENT PAGE TABS -->
+        <nav class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            
+            <!-- Tab 1 Button -->
+            <button id="tabBtn1" onclick="switchTab(1)" 
+                    class="tab-active bg-white border-2 border-brand-500 p-4 sm:p-5 rounded-2xl text-left transition-all duration-200 flex sm:flex-col justify-between items-center sm:items-start group relative overflow-hidden">
+                <div class="flex items-center gap-3 mb-0 sm:mb-2">
+                    <div id="tabIconBg1" class="w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center text-lg font-bold shrink-0 transition">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-extrabold tracking-wider text-brand-600 uppercase block">STEP 01</span>
+                        <h2 id="tabTitle1" class="text-base sm:text-lg font-black text-slate-900">1. 숙제 입력</h2>
+                    </div>
+                </div>
+                <p id="tabDesc1" class="text-xs text-slate-500 hidden sm:block font-medium">숙제 이름, 마감시간, 난이도를 등록하세요</p>
+                <div id="tabIndicator1" class="w-full h-1 bg-brand-500 rounded-full mt-3"></div>
+            </button>
+
+            <!-- Tab 2 Button -->
+            <button id="tabBtn2" onclick="switchTab(2)" 
+                    class="bg-white/80 hover:bg-white border-2 border-slate-200/80 p-4 sm:p-5 rounded-2xl text-left transition-all duration-200 flex sm:flex-col justify-between items-center sm:items-start group relative overflow-hidden">
+                <div class="flex items-center gap-3 mb-0 sm:mb-2">
+                    <div id="tabIconBg2" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center text-lg font-bold shrink-0 transition">
+                        <i class="fa-solid fa-arrow-down-short-wide"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-extrabold tracking-wider text-slate-400 uppercase block">STEP 02</span>
+                        <h2 id="tabTitle2" class="text-base sm:text-lg font-bold text-slate-600">2. 순위 분석</h2>
+                    </div>
+                </div>
+                <p id="tabDesc2" class="text-xs text-slate-400 hidden sm:block font-medium">1순위, 2순위, 3순위 우선순위 솔루션</p>
+                <div id="tabIndicator2" class="w-full h-1 bg-transparent rounded-full mt-3"></div>
+            </button>
+
+            <!-- Tab 3 Button -->
+            <button id="tabBtn3" onclick="switchTab(3)" 
+                    class="bg-white/80 hover:bg-white border-2 border-slate-200/80 p-4 sm:p-5 rounded-2xl text-left transition-all duration-200 flex sm:flex-col justify-between items-center sm:items-start group relative overflow-hidden">
+                <div class="flex items-center gap-3 mb-0 sm:mb-2">
+                    <div id="tabIconBg3" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center text-lg font-bold shrink-0 transition">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-extrabold tracking-wider text-slate-400 uppercase block">STEP 03</span>
+                        <h2 id="tabTitle3" class="text-base sm:text-lg font-bold text-slate-600">3. 시각화 리포트</h2>
+                    </div>
+                </div>
+                <p id="tabDesc3" class="text-xs text-slate-400 hidden sm:block font-medium">그래프와 위급도별 클래식 BGM 모니터링</p>
+                <div id="tabIndicator3" class="w-full h-1 bg-transparent rounded-full mt-3"></div>
+            </button>
+
+        </nav>
+
+        <!-- ================= PAGE 1: HOMEWORK INPUT PAGE ================= -->
+        <section id="page1" class="space-y-6 animate-fade-in">
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+                <!-- Left: Form Input Card -->
+                <div class="md:col-span-5 bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4 self-start">
+                    <div class="border-b border-slate-100 pb-3 flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-plus text-brand-500 text-base"></i> 새로운 숙제 등록
+                        </h3>
+                        <span class="text-[11px] text-slate-400 font-medium">쉬움 · 보통 · 어려움</span>
+                    </div>
+
+                    <form id="homeworkForm" onsubmit="handleAddTask(event)" class="space-y-3.5">
+                        <!-- Task Name -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">숙제 이름 <span class="text-red-500">*</span></label>
+                            <input type="text" id="taskName" required placeholder="예: 수학 워크북 12~15p 풀기"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                        </div>
+
+                        <!-- Academy / Subject -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">학원 / 과목 <span class="text-red-500">*</span></label>
+                            <input type="text" id="taskSubject" required placeholder="예: 대성학원 영어단어 암기"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                        </div>
+
+                        <!-- Flexible Deadline & Duration -->
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">
+                                    마감시간 <span class="text-[10px] text-slate-400 font-normal">(자유입력)</span>
+                                </label>
+                                <input type="text" id="taskDeadlineText" placeholder="예: 오늘 밤, 2시간 뒤"
+                                       class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">
+                                    예상시간 <span class="text-[10px] text-slate-400 font-normal">(분 단위)</span>
+                                </label>
+                                <input type="number" id="taskDuration" min="1" required placeholder="예: 3 (제한없음)"
+                                       class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                            </div>
+                        </div>
+
+                        <!-- Difficulty Selection -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">숙제 난이도</label>
+                            <select id="taskDifficulty"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition bg-white cursor-pointer">
+                                <option value="0.8">🟢 쉬움 (시간 20% 단축 보정)</option>
+                                <option value="1.0" selected>🟡 보통 (예상 소요시간 그대로)</option>
+                                <option value="1.3">🟠 어려움 (집중 보정 +30%)</option>
+                                <option value="1.6">🔴 극상 (막힘/고난도 +60%)</option>
+                            </select>
+                        </div>
+
+                        <!-- Combined Strictness & Importance Slider -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-bold text-slate-700">중요도 & 처벌 엄격도</label>
+                                <span id="importanceVal" class="text-xs font-bold text-amber-600">3단계 (보통)</span>
+                            </div>
+                            <input type="range" id="taskImportance" min="1" max="5" value="3" oninput="updateRangeLabel('importanceVal', this.value)"
+                                   class="w-full accent-amber-500 cursor-pointer h-1.5 bg-slate-100 rounded-lg">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                <span>1단계(낮음)</span>
+                                <span>3단계(보통)</span>
+                                <span>5단계(매우높음)</span>
+                            </div>
+                        </div>
+
+                        <!-- Submit Add Button -->
+                        <button type="submit"
+                                class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white font-extrabold rounded-xl shadow-md shadow-brand-500/20 transition flex items-center justify-center gap-2 text-xs mt-2">
+                            <i class="fa-solid fa-plus"></i> 숙제 목록에 추가
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right: Registered Homework List -->
+                <div class="md:col-span-7 space-y-4 flex flex-col justify-between">
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3 flex-grow">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-accent-500 text-base"></i> 입력된 숙제 리스트
+                                <span id="inputCountBadge" class="bg-accent-50 text-accent-600 px-2.5 py-0.5 rounded-full text-xs font-extrabold">0개</span>
+                            </h3>
+                            <button onclick="clearAllTasks()" class="text-[11px] text-slate-400 hover:text-red-500 flex items-center gap-1 transition">
+                                <i class="fa-solid fa-trash-can"></i> 전체 비우기
+                            </button>
+                        </div>
+
+                        <!-- Tasks Dynamic Container -->
+                        <div id="p1TaskList" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                            <!-- Items Populated via JS -->
+                        </div>
+
+                        <!-- Empty State -->
+                        <div id="p1EmptyState" class="py-14 text-center space-y-2.5">
+                            <div class="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300 mx-auto text-2xl">
+                                <i class="fa-solid fa-file-circle-plus"></i>
+                            </div>
+                            <p class="text-xs text-slate-400 font-medium">아직 추가된 숙제가 없습니다.<br>왼쪽 양식에서 오늘 처리해야 할 숙제를 등록해주세요!</p>
+                        </div>
+                    </div>
+
+                    <!-- CTA Button -->
+                    <button id="analyzeBtn" onclick="switchTab(2)" disabled
+                            class="w-full py-4 bg-brand-500 hover:bg-brand-600 disabled:bg-slate-200 disabled:cursor-not-allowed text-white font-black rounded-2xl shadow-lg shadow-brand-500/20 transition text-sm flex items-center justify-center gap-2">
+                        <span>2단계: 순위 분석 및 솔루션 확인하기</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ================= PAGE 2: PRIORITY ANALYSIS PAGE ================= -->
+        <section id="page2" class="space-y-6 hidden animate-fade-in">
+
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-accent-500"></i> AI 스마트 숙제 실행 순위 솔루션
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">처벌 위험도, 난이도 보정 소요시간, 마감 기한을 종합 계산하여 1순위, 2순위, 3순위를 자동 배치했습니다.</p>
+                </div>
+                
+                <button onclick="switchTab(1)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-pen-to-square"></i> 숙제 항목 수정
+                </button>
+            </div>
+
+            <!-- Priority Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-medium text-slate-400">총 미완료 숙제</p>
+                        <h4 id="resTotalCount" class="text-xl font-black text-slate-800 mt-0.5">0개</h4>
+                    </div>
+                    <div class="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center text-brand-600 text-lg">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-medium text-slate-400">총 추천 투자시간</p>
+                        <h4 id="resTotalTime" class="text-xl font-black text-accent-600 mt-0.5">0분</h4>
+                    </div>
+                    <div class="w-10 h-10 bg-accent-50 rounded-xl flex items-center justify-center text-accent-500 text-lg">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-medium text-slate-400">고위험/긴급 숙제</p>
+                        <h4 id="resUrgentCount" class="text-xl font-black text-amber-600 mt-0.5">0개</h4>
+                    </div>
+                    <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500 text-lg">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ranked Homework Cards -->
+            <div id="priorityTaskList" class="space-y-4">
+                <!-- Dynamically populated cards -->
+            </div>
+
+            <!-- Overall Tip Card -->
+            <div class="bg-gradient-to-r from-accent-50 via-white to-brand-50 p-5 rounded-2xl border border-slate-200 space-y-2">
+                <h4 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-lightbulb text-amber-500"></i> 숙-쓱 맞춤 공부 공략 팁
+                </h4>
+                <p id="overallStudyTip" class="text-xs text-slate-600 leading-relaxed">
+                    숙제를 완수할 때마다 체크박스를 클릭하여 지워나가세요. Concentrated study mode로 빠른 몰입을 유도합니다.
+                </p>
+            </div>
+
+        </section>
+
+        <!-- ================= PAGE 3: VISUAL REPORT & GRAPH PAGE ================= -->
+        <section id="page3" class="space-y-6 hidden animate-fade-in">
+
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-brand-500"></i> 숙제 시각화 분석 리포트
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">남은 숙제 양, 투자 시간 비율, 상태별 색상 그래프 및 위급도별 BGM 음악을 모니터링하세요.</p>
+                </div>
+
+                <div class="bg-brand-50 px-3 py-1.5 rounded-xl border border-brand-100 flex items-center gap-2 text-xs font-bold text-brand-700">
+                    <i class="fa-solid fa-bolt"></i> 168 시간 관리 모드
+                </div>
+            </div>
+
+            <!-- Visual Graph Dashboard Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+                <!-- Donut Progress Ring Card -->
+                <div class="md:col-span-5 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center space-y-4">
+                    <h4 class="text-xs font-bold text-slate-700">전체 숙제 달성률</h4>
+
+                    <!-- SVG Circular Progress Bar -->
+                    <div class="relative w-40 h-40 flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-slate-100" stroke-width="3.5" stroke="currentColor" fill="none"
+                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path id="progressCircle" class="text-brand-500 transition-all duration-700 ease-out" stroke-dasharray="0, 100" stroke-linecap="round" stroke-width="3.5" stroke="currentColor" fill="none"
+                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span id="progressPercent" class="text-3xl font-black text-slate-800">0%</span>
+                            <span id="progressSubText" class="text-[10px] text-slate-400 font-medium">0 / 0 완료</span>
+                        </div>
+                    </div>
+
+                    <div class="w-full grid grid-cols-2 gap-2 text-xs pt-2">
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                            <span class="block text-[10px] text-slate-400 font-medium">완료된 숙제</span>
+                            <span id="doneCountText" class="font-bold text-slate-800">0개</span>
+                        </div>
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                            <span class="block text-[10px] text-slate-400 font-medium">남은 숙제</span>
+                            <span id="remainingCountText" class="font-bold text-slate-800">0개</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subject Time Distribution Bar Chart Card -->
+                <div class="md:col-span-7 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-xs font-bold text-slate-700">과목별 필요 소요시간 (분)</h4>
+                        <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-medium">자동 계산</span>
+                    </div>
+
+                    <!-- Dynamic Horizontal Bar Graph -->
+                    <div id="barGraphContainer" class="space-y-3 py-2">
+                        <!-- Items populated via JS -->
+                    </div>
+
+                    <div class="text-[11px] text-slate-400 border-t border-slate-100 pt-3 flex items-center justify-between">
+                        <span>💡 난이도가 높을수록 그래프 길이가 길어집니다.</span>
+                        <span class="font-bold text-slate-600" id="graphTotalHours">총 소요: 0분</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- BGM Status Card & Direct Player -->
+            <div id="bgmControlCard" class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden space-y-4">
+                
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-700/80 pb-4 relative z-10">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span id="bgmUrgencyBadge" class="bg-brand-500 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">🟢 PEACEFUL</span>
+                            <h4 class="text-base font-extrabold tracking-tight">클래식 스마트 오디오 엔진</h4>
+                        </div>
+                        <p id="bgmThemeDesc" class="text-xs text-slate-300 mt-1">잔잔한 호텔 로비 피아노 테마 (안전한 상태)</p>
+                    </div>
+
+                    <!-- Direct Audio Controls -->
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <button id="bgmPlayToggleBtn" onclick="toggleAudioEngine()" 
+                                class="flex-1 sm:flex-none px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-black text-xs rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                            <i id="bgmPlayBtnIcon" class="fa-solid fa-play"></i>
+                            <span id="bgmPlayBtnLabel">음악 재생하기</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BGM Dynamic Indicators -->
+                <div class="grid grid-cols-3 gap-3 text-center relative z-10 text-xs">
+                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
+                        <span class="text-[10px] text-slate-400 block font-medium">연주 템포 (Tempo)</span>
+                        <span id="bgmTempoLabel" class="text-sm font-extrabold text-brand-400 mt-0.5 block">80 BPM</span>
+                    </div>
+                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
+                        <span class="text-[10px] text-slate-400 block font-medium">사운드 볼륨 (Volume)</span>
+                        <span id="bgmVolumeLabel" class="text-sm font-extrabold text-blue-400 mt-0.5 block">35%</span>
+                    </div>
+                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
+                        <span class="text-[10px] text-slate-400 block font-medium">긴급 상태</span>
+                        <span id="bgmStatusLabel" class="text-sm font-extrabold text-emerald-400 mt-0.5 block">여유로움</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Floating Audio Control Dock (Fixed Bottom) -->
+    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-xl bg-slate-900/90 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700/80 flex items-center justify-between z-40">
+        <div class="flex items-center gap-3">
+            <button onclick="toggleAudioEngine()" class="w-10 h-10 bg-brand-500 hover:bg-brand-600 text-white rounded-xl flex items-center justify-center text-sm shadow-md transition">
+                <i id="dockPlayIcon" class="fa-solid fa-play"></i>
+            </button>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span id="dockMusicDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <h5 id="dockTrackName" class="text-xs font-bold text-white">숙-쓱 클래식 BGM: 재생 중지됨</h5>
+                </div>
+                <p id="dockTrackMeta" class="text-[10px] text-slate-400">위급도가 높을수록 더 빠르고 크게 연주됩니다</p>
+            </div>
         </div>
 
-        <div class="flex flex-col items-end gap-2">
-          <!-- Countdown Timer Display -->
-          <div id="timerDisplay" class="hidden bg-red-950/80 border border-red-500 px-3 py-1 rounded text-red-300 animate-pulse text-base">
-            ESCAPE: <span id="timerText" class="text-white font-bold">30.0</span>s
-          </div>
-          <div class="bg-black/60 backdrop-blur px-2 py-1 rounded border border-amber-500/30 flex items-center gap-2">
-            <span>GOLD COINS:</span>
-            <span id="coinText" class="text-amber-300">0</span>
-          </div>
+        <div class="flex items-center gap-2">
+            <button onclick="switchTab(3)" class="text-xs text-brand-400 hover:text-brand-300 font-bold px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700 transition">
+                리포트 <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </button>
         </div>
-      </div>
-
-      <!-- Action Indicator / Tip Banner -->
-      <div id="actionTip" class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 bg-amber-900/90 border border-amber-400 text-amber-200 px-4 py-2 rounded-lg pixel-font text-xs text-center pointer-events-none shadow-lg animate-bounce">
-        TIP: HOOK READY! PRESS JUMP!
-      </div>
-
-      <!-- Start Screen -->
-      <div id="startOverlay" class="absolute inset-0 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-10">
-        <h1 class="pixel-font text-2xl sm:text-4xl text-amber-500 mb-3 drop-shadow-[0_4px_10px_rgba(245,158,11,0.5)]">TOMB RUNNER EXTREME</h1>
-        <p class="text-gray-300 max-w-md text-sm sm:text-base mb-5">
-          Conquer 3500m of extreme tomb traps, crack the vault lock, and survive the 3-lane escape before time expires!
-        </p>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 w-full max-w-xl text-xs text-gray-300">
-          <div class="bg-amber-950/40 border border-amber-800/60 p-2.5 rounded-lg text-left">
-            <div class="text-amber-400 font-bold mb-1 text-center">🏃 1. HARDCORE PARKOUR</div>
-            <div>• Crumbling Bridges</div>
-            <div>• Swinging Pendulum Blades</div>
-            <div>• Wall-Run Strips</div>
-            <div>• Grappling Hook Rings (Press Jump)</div>
-          </div>
-          <div class="bg-amber-950/40 border border-amber-800/60 p-2.5 rounded-lg text-left">
-            <div class="text-amber-400 font-bold mb-1 text-center">🔓 2. SAFE CRACKING</div>
-            <div>Hit 3 lock pins when needle aligns in the GREEN target zone!</div>
-          </div>
-          <div class="bg-amber-950/40 border border-amber-800/60 p-2.5 rounded-lg text-left">
-            <div class="text-amber-400 font-bold mb-1 text-center">⚡ 3. 3-LANE ESCAPE</div>
-            <div>• ⬅️➡️ Switch Lanes</div>
-            <div>• ⬆️ Jump / ⬇️ Slide</div>
-            <div>• Outrun the Boulder!</div>
-          </div>
-        </div>
-
-        <button id="startBtn" class="pixel-font bg-amber-600 hover:bg-amber-500 text-black font-bold px-8 py-4 rounded-lg shadow-lg hover:scale-105 transition duration-200 pointer-events-auto cursor-pointer">
-          START EXPEDITION
-        </button>
-      </div>
-
-      <!-- Game Over / Victory Overlay -->
-      <div id="endOverlay" class="hidden absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20">
-        <h2 id="endTitle" class="pixel-font text-3xl sm:text-5xl text-red-500 mb-2">GAME OVER</h2>
-        <p id="endSubtitle" class="text-gray-300 text-sm sm:text-base mb-6">The ancient tomb traps claimed your life...</p>
-        <div class="bg-amber-950/30 border border-amber-500/30 p-4 rounded-lg mb-6 w-64 text-sm">
-          <div class="flex justify-between mb-2"><span>Final Score:</span><span id="finalScore" class="text-amber-400 font-bold">0</span></div>
-          <div class="flex justify-between mb-2"><span>Gold Collected:</span><span id="finalCoins" class="text-amber-400 font-bold">0</span></div>
-          <div class="flex justify-between"><span>Max Distance:</span><span id="finalDist" class="text-amber-400 font-bold">0m</span></div>
-        </div>
-        <button id="restartBtn" class="pixel-font bg-amber-600 hover:bg-amber-500 text-black font-bold px-6 py-3 rounded-lg shadow-lg hover:scale-105 transition duration-200 pointer-events-auto cursor-pointer">
-          TRY AGAIN
-        </button>
-      </div>
     </div>
 
-    <!-- On-screen Controls for Mobile/Touch -->
-    <div class="w-full flex justify-between items-center mt-3 px-2 sm:hidden">
-      <div class="flex gap-2">
-        <button id="btnLeft" class="bg-amber-900/60 active:bg-amber-600 border border-amber-500/50 p-4 rounded-lg text-white font-bold select-none">⬅️</button>
-        <button id="btnRight" class="bg-amber-900/60 active:bg-amber-600 border border-amber-500/50 p-4 rounded-lg text-white font-bold select-none">➡️</button>
-      </div>
-      <div class="flex gap-2">
-        <button id="btnDown" class="bg-amber-900/60 active:bg-amber-600 border border-amber-500/50 p-4 rounded-lg text-white font-bold select-none">⬇️ (Slide)</button>
-        <button id="btnJump" class="bg-amber-600 active:bg-amber-400 border border-amber-400 p-4 rounded-lg text-black font-bold select-none">⬆️ (Jump/Hook)</button>
-      </div>
-    </div>
-  </div>
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-400">
+        <div class="max-w-5xl mx-auto px-4 space-y-1">
+            <p class="font-bold text-slate-600">숙-쓱 (Suk-Sseuk) · 168 스마트 공부 플래너</p>
+            <p class="text-[11px]">일주일 168시간을 지배하는 최고의 스마트 클래식 리포트 웹앱</p>
+        </div>
+    </footer>
 
-  <script>
-    class AudioSynth {
-      constructor() {
-        this.ctx = null;
-      }
-      init() {
-        if (!this.ctx) {
-          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-      }
-      playJump() {
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(160, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(450, this.ctx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.15);
-      }
-      playGrapple() {
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(300, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.25);
-        gain.gain.setValueAtTime(0.35, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.25);
-      }
-      playCoin() {
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(987.77, this.ctx.currentTime);
-        osc.frequency.setValueAtTime(1318.51, this.ctx.currentTime + 0.08);
-        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.25);
-      }
-      playHurt() {
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(180, this.ctx.currentTime);
-        osc.frequency.linearRampToValueAtTime(40, this.ctx.currentTime + 0.2);
-        gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.2);
-      }
-      playCrumble() {
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(80, this.ctx.currentTime);
-        osc.frequency.linearRampToValueAtTime(30, this.ctx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.3);
-      }
-      playClick(success = true) {
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(success ? 880 : 220, this.ctx.currentTime);
-        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.12);
-      }
-      playAlarm() {
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(600, this.ctx.currentTime);
-        osc.frequency.linearRampToValueAtTime(200, this.ctx.currentTime + 0.4);
-        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.4);
-      }
-    }
+    <script>
+        // Tasks Memory State
+        let tasks = [];
 
-    const audio = new AudioSynth();
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+        let activeTab = 1;
 
-    const V_WIDTH = 800;
-    const V_HEIGHT = 450;
-    canvas.width = V_WIDTH;
-    canvas.height = V_HEIGHT;
+        // Web Audio Synthesizer State
+        let audioCtx = null;
+        let isAudioPlaying = false;
+        let currentLoopId = null;
+        let currentBgmMode = "PEACEFUL"; // PEACEFUL, CAUTION, URGENT
 
-    // Modes
-    const MODE = {
-      PARKOUR: 'PARKOUR RUN',
-      SAFE: 'SAFE CRACKING',
-      RUNNER: 'PARKOUR ESCAPE'
-    };
-
-    let currentMode = MODE.PARKOUR;
-    let gameRunning = false;
-    let score = 0;
-    let coinsCollected = 0;
-    let cameraX = 0;
-    let cameraShake = 0;
-    let escapeTimer = 30.0;
-    let timerActive = false;
-    const PARKOUR_TOTAL_DIST = 3500;
-
-    const keys = {
-      left: false,
-      right: false,
-      up: false,
-      down: false,
-      jumpPressed: false,
-      downPressed: false
-    };
-
-    class Player {
-      constructor() {
-        this.reset();
-      }
-      reset() {
-        this.x = 80;
-        this.y = 300;
-        this.width = 24;
-        this.height = 36;
-        this.vx = 0;
-        this.vy = 0;
-        this.speed = 4.5;
-        this.jumpForce = -10.2;
-        this.grounded = false;
-        this.sliding = false;
-        this.slideTimer = 0;
-        this.hp = 3;
-        this.invulnerableTimer = 0;
-        this.facing = 1;
-        this.animFrame = 0;
-        this.animTimer = 0;
-
-        // Wall-Run & Hook States
-        this.isWallRunning = false;
-        this.wallRunTimer = 0;
-        this.isGrappling = false;
-        this.grappleTarget = null;
-        this.grappleAngle = 0;
-
-        // Runner properties (Tom Gold Run 3-lane style)
-        this.lane = 1; // 0: Left, 1: Center, 2: Right
-        this.targetLaneX = 400;
-        this.runnerX = 400;
-        this.runnerY = 320;
-        this.runnerVy = 0;
-        this.runnerJumping = false;
-        this.runnerSliding = false;
-        this.runnerSlideTimer = 0;
-      }
-
-      update(platforms, hazards, hooks, wallRunStrips, darts, stalactites) {
-        if (this.invulnerableTimer > 0) this.invulnerableTimer--;
-
-        if (currentMode === MODE.PARKOUR) {
-          // Speed boost as player advances through parkour
-          const progressFactor = Math.min(1.5, 1 + (this.x / PARKOUR_TOTAL_DIST) * 0.4);
-          const currentSpeed = this.speed * progressFactor;
-
-          if (this.isGrappling && this.grappleTarget) {
-            // Grapple Swing Physics
-            this.grappleAngle += 0.08;
-            this.x = this.grappleTarget.x + Math.sin(this.grappleAngle) * 90;
-            this.y = this.grappleTarget.y + Math.cos(this.grappleAngle) * 90;
-
-            if (keys.jumpPressed || this.grappleAngle > Math.PI * 0.4) {
-              this.isGrappling = false;
-              this.vy = this.jumpForce * 1.1;
-              this.vx = currentSpeed * 1.4;
-              keys.jumpPressed = false;
-              audio.playJump();
+        // Pure Web Audio Synthesizer Engine (100% Reliable in preview/iframes)
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
             }
-          } else {
-            // Standard Parkour & Wall-Run Movement
-            if (keys.left) {
-              this.vx = -currentSpeed;
-              this.facing = -1;
-            } else if (keys.right) {
-              this.vx = currentSpeed;
-              this.facing = 1;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Play Tone Helper
+        function playTone(freq, duration, type = 'sine', gainVal = 0.1) {
+            if (!audioCtx || !isAudioPlaying) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.error("Audio synth error:", e);
+            }
+        }
+
+        // BGM Music Synthesizer Sequences
+        function startBgmEngine() {
+            if (currentLoopId) clearInterval(currentLoopId);
+
+            // Compute current max urgency from tasks
+            updateBgmModeByUrgency();
+
+            let noteIndex = 0;
+
+            if (currentBgmMode === "PEACEFUL") {
+                // Peaceful Lounge Piano Notes (Tempo: 80 BPM, Volume: 35%)
+                const notes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63]; // C4, E4, G4, C5, G4, E4
+                const interval = (60 / 80) * 1000;
+
+                currentLoopId = setInterval(() => {
+                    if (!isAudioPlaying) return;
+                    playTone(notes[noteIndex % notes.length], 0.6, 'sine', 0.15);
+                    noteIndex++;
+                }, interval);
+
+            } else if (currentBgmMode === "CAUTION") {
+                // Grieg - In the Hall of the Mountain King Motif (Tempo: 135 BPM, Volume: 65%)
+                const notes = [220.00, 246.94, 261.63, 293.66, 329.63, 261.63, 329.63]; // A3, B3, C4, D4, E4, C4, E4
+                const interval = (60 / 135) * 1000;
+
+                currentLoopId = setInterval(() => {
+                    if (!isAudioPlaying) return;
+                    playTone(notes[noteIndex % notes.length], 0.35, 'triangle', 0.3);
+                    noteIndex++;
+                }, interval);
+
+            } else if (currentBgmMode === "URGENT") {
+                // Beethoven Symphony No. 5 'Fate' Motif (Tempo: 175 BPM, Volume: 95%)
+                // G G G Eb ... F F F D
+                const fateSeq = [
+                    { f: 392.00, d: 0.15 }, { f: 392.00, d: 0.15 }, { f: 392.00, d: 0.15 }, { f: 311.13, d: 0.6 },
+                    { f: 349.23, d: 0.15 }, { f: 349.23, d: 0.15 }, { f: 349.23, d: 0.15 }, { f: 293.66, d: 0.6 }
+                ];
+                const interval = (60 / 175) * 1000;
+
+                currentLoopId = setInterval(() => {
+                    if (!isAudioPlaying) return;
+                    const item = fateSeq[noteIndex % fateSeq.length];
+                    playTone(item.f, item.d, 'sawtooth', 0.45);
+                    noteIndex++;
+                }, interval);
+            }
+
+            updateBgmUi();
+        }
+
+        function toggleAudioEngine() {
+            initAudioContext();
+            isAudioPlaying = !isAudioPlaying;
+
+            if (isAudioPlaying) {
+                startBgmEngine();
             } else {
-              this.vx *= 0.75;
+                if (currentLoopId) clearInterval(currentLoopId);
+                updateBgmUi();
+            }
+        }
+
+        function updateBgmModeByUrgency() {
+            const activeTasks = tasks.filter(t => !t.completed);
+            if (activeTasks.length === 0) {
+                currentBgmMode = "PEACEFUL";
+                return;
             }
 
-            // Slide
-            if (keys.downPressed && this.grounded && !this.sliding) {
-              this.sliding = true;
-              this.slideTimer = 22;
-              this.height = 18;
-              this.y += 18;
-              keys.downPressed = false;
-            }
+            // Check max urgency score across tasks
+            let maxUrgency = 0;
+            activeTasks.forEach(t => {
+                const score = (t.importance * 1.5) + (t.difficulty * 2);
+                if (score > maxUrgency) maxUrgency = score;
+            });
 
-            if (this.sliding) {
-              this.slideTimer--;
-              if (this.slideTimer <= 0) {
-                this.sliding = false;
-                this.height = 36;
-                this.y -= 18;
-              }
-            }
-
-            // Grapple Ring Detection
-            let hookNearby = null;
-            for (let h of hooks) {
-              if (Math.hypot(this.x - h.x, this.y - h.y) < 110 && !this.grounded) {
-                hookNearby = h;
-                break;
-              }
-            }
-
-            const tipBanner = document.getElementById('actionTip');
-            if (hookNearby) {
-              tipBanner.classList.remove('hidden');
-              tipBanner.innerText = "OVERHEAD RING! PRESS JUMP TO GRAPPLE!";
-              if (keys.jumpPressed) {
-                this.isGrappling = true;
-                this.grappleTarget = hookNearby;
-                this.grappleAngle = -Math.PI * 0.4;
-                keys.jumpPressed = false;
-                audio.playGrapple();
-              }
+            if (maxUrgency >= 8.5) {
+                currentBgmMode = "URGENT";
+            } else if (maxUrgency >= 5.5) {
+                currentBgmMode = "CAUTION";
             } else {
-              tipBanner.classList.add('hidden');
+                currentBgmMode = "PEACEFUL";
+            }
+        }
+
+        function updateBgmUi() {
+            const headerBtn = document.getElementById('headerBgmText');
+            const headerIcon = document.getElementById('headerBgmIcon');
+            const dockIcon = document.getElementById('dockPlayIcon');
+            const dockDot = document.getElementById('dockMusicDot');
+            const dockTrack = document.getElementById('dockTrackName');
+            const bgmBadge = document.getElementById('bgmUrgencyBadge');
+            const bgmDesc = document.getElementById('bgmThemeDesc');
+            const bgmPlayLabel = document.getElementById('bgmPlayBtnLabel');
+            const bgmPlayIcon = document.getElementById('bgmPlayBtnIcon');
+            const tempoLabel = document.getElementById('bgmTempoLabel');
+            const volumeLabel = document.getElementById('bgmVolumeLabel');
+            const statusLabel = document.getElementById('bgmStatusLabel');
+
+            if (isAudioPlaying) {
+                if (headerBtn) headerBtn.textContent = "BGM: 일시정지";
+                if (headerIcon) headerIcon.className = "fa-solid fa-pause text-brand-500 animate-pulse";
+                if (dockIcon) dockIcon.className = "fa-solid fa-pause";
+                if (dockDot) dockDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
+                if (bgmPlayLabel) bgmPlayLabel.textContent = "음악 일시정지";
+                if (bgmPlayIcon) bgmPlayIcon.className = "fa-solid fa-pause";
+            } else {
+                if (headerBtn) headerBtn.textContent = "BGM: 재생하기";
+                if (headerIcon) headerIcon.className = "fa-solid fa-music text-brand-500";
+                if (dockIcon) dockIcon.className = "fa-solid fa-play";
+                if (dockDot) dockDot.className = "w-2 h-2 rounded-full bg-slate-500";
+                if (bgmPlayLabel) bgmPlayLabel.textContent = "음악 재생하기";
+                if (bgmPlayIcon) bgmPlayIcon.className = "fa-solid fa-play";
             }
 
-            // Wall-Run Detection
-            this.isWallRunning = false;
-            for (let wr of wallRunStrips) {
-              if (
-                this.x >= wr.x && this.x <= wr.x + wr.w &&
-                this.y >= wr.y - 40 && this.y <= wr.y + wr.h
-              ) {
-                if (!this.grounded && keys.right) {
-                  this.isWallRunning = true;
-                  this.vy = 0; // Lock Y during wall-run
-                  this.vx = currentSpeed * 1.15;
-                  if (keys.jumpPressed) {
-                    this.vy = this.jumpForce;
-                    keys.jumpPressed = false;
-                    audio.playJump();
-                  }
+            if (currentBgmMode === "PEACEFUL") {
+                if (bgmBadge) { bgmBadge.textContent = "🟢 PEACEFUL"; bgmBadge.className = "bg-emerald-500 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase"; }
+                if (bgmDesc) bgmDesc.textContent = "잔잔한 호텔 로비 피아노 테마 (안전한 상태)";
+                if (tempoLabel) tempoLabel.textContent = "80 BPM (느림)";
+                if (volumeLabel) volumeLabel.textContent = "35% (잔잔함)";
+                if (statusLabel) { statusLabel.textContent = "여유로움"; statusLabel.className = "text-sm font-extrabold text-emerald-400 mt-0.5 block"; }
+                if (dockTrack) dockTrack.textContent = isAudioPlaying ? "BGM: 드뷔시 달빛풍 호텔 로비 연주 중" : "숙-쓱 클래식 BGM: 재생 중지됨";
+            } else if (currentBgmMode === "CAUTION") {
+                if (bgmBadge) { bgmBadge.textContent = "🟡 CAUTION"; bgmBadge.className = "bg-amber-500 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase"; }
+                if (bgmDesc) bgmDesc.textContent = "페르귄트 '마왕의 궁전에서' 긴장조 테마 (보통 상태)";
+                if (tempoLabel) tempoLabel.textContent = "135 BPM (보통)";
+                if (volumeLabel) volumeLabel.textContent = "65% (중간)";
+                if (statusLabel) { statusLabel.textContent = "주의 필요"; statusLabel.className = "text-sm font-extrabold text-amber-400 mt-0.5 block"; }
+                if (dockTrack) dockTrack.textContent = isAudioPlaying ? "BGM: 페르귄트 마왕의 궁전 연주 중" : "숙-쓱 클래식 BGM: 재생 중지됨";
+            } else {
+                if (bgmBadge) { bgmBadge.textContent = "🔴 URGENT"; bgmBadge.className = "bg-red-500 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase danger-pulse"; }
+                if (bgmDesc) bgmDesc.textContent = "베토벤 운명 교향곡 쿵쿵쿵쿵 긴급 테마 (위험 상태)";
+                if (tempoLabel) tempoLabel.textContent = "175 BPM (매우 빠름)";
+                if (volumeLabel) volumeLabel.textContent = "95% (매우 큼)";
+                if (statusLabel) { statusLabel.textContent = "비상 상황!"; statusLabel.className = "text-sm font-extrabold text-red-400 mt-0.5 block"; }
+                if (dockTrack) dockTrack.textContent = isAudioPlaying ? "BGM: 베토벤 운명 교향곡 연주 중" : "숙-쓱 클래식 BGM: 재생 중지됨";
+            }
+        }
+
+        function switchTab(tabNum) {
+            activeTab = tabNum;
+
+            // Hide all pages
+            [1, 2, 3].forEach(n => {
+                const page = document.getElementById(`page${n}`);
+                const btn = document.getElementById(`tabBtn${n}`);
+                const iconBg = document.getElementById(`tabIconBg${n}`);
+                const title = document.getElementById(`tabTitle${n}`);
+                const indicator = document.getElementById(`tabIndicator${n}`);
+
+                if (page) page.classList.add('hidden');
+                if (btn) {
+                    btn.className = "bg-white/80 hover:bg-white border-2 border-slate-200/80 p-4 sm:p-5 rounded-2xl text-left transition-all duration-200 flex sm:flex-col justify-between items-center sm:items-start group relative overflow-hidden";
                 }
-              }
+                if (iconBg) iconBg.className = "w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center text-lg font-bold shrink-0 transition";
+                if (title) title.className = "text-base sm:text-lg font-bold text-slate-600";
+                if (indicator) indicator.className = "w-full h-1 bg-transparent rounded-full mt-3";
+            });
+
+            // Activate target page
+            const activePage = document.getElementById(`page${tabNum}`);
+            const activeBtn = document.getElementById(`tabBtn${tabNum}`);
+            const activeIconBg = document.getElementById(`tabIconBg${tabNum}`);
+            const activeTitle = document.getElementById(`tabTitle${tabNum}`);
+            const activeIndicator = document.getElementById(`tabIndicator${tabNum}`);
+
+            if (activePage) activePage.classList.remove('hidden');
+            if (activeBtn) {
+                activeBtn.className = "tab-active bg-white border-2 border-brand-500 p-4 sm:p-5 rounded-2xl text-left transition-all duration-200 flex sm:flex-col justify-between items-center sm:items-start group relative overflow-hidden shadow-lg shadow-brand-500/10";
             }
+            if (activeIconBg) activeIconBg.className = "w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center text-lg font-bold shrink-0 transition";
+            if (activeTitle) activeTitle.className = "text-base sm:text-lg font-black text-slate-900";
+            if (activeIndicator) activeIndicator.className = "w-full h-1 bg-brand-500 rounded-full mt-3";
 
-            // Normal Jump
-            if (keys.jumpPressed && !this.isGrappling) {
-              keys.jumpPressed = false;
-              if (this.grounded) {
-                this.vy = this.jumpForce;
-                this.grounded = false;
-                audio.playJump();
-              }
+            renderAll();
+
+            if (isAudioPlaying) {
+                startBgmEngine();
             }
+        }
 
-            if (!this.isWallRunning) {
-              this.vy += 0.48; // Gravity
+        function handleAddTask(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('taskName');
+            const subjectInput = document.getElementById('taskSubject');
+            const deadlineInput = document.getElementById('taskDeadlineText');
+            const durationInput = document.getElementById('taskDuration');
+            const difficultyInput = document.getElementById('taskDifficulty');
+            const importanceInput = document.getElementById('taskImportance');
+
+            const newTask = {
+                id: Date.now(),
+                name: nameInput.value.trim(),
+                subject: subjectInput.value.trim(),
+                deadlineText: deadlineInput.value.trim() || "자유 마감",
+                duration: parseInt(durationInput.value) || 10,
+                difficulty: parseFloat(difficultyInput.value) || 1.0,
+                importance: parseInt(importanceInput.value) || 3,
+                completed: false
+            };
+
+            tasks.push(newTask);
+
+            // Reset Form
+            nameInput.value = '';
+            subjectInput.value = '';
+            deadlineInput.value = '';
+            durationInput.value = '';
+
+            renderAll();
+
+            if (isAudioPlaying) {
+                startBgmEngine();
             }
+        }
 
-            this.x += this.vx;
-            this.y += this.vy;
+        function updateRangeLabel(id, val) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const labels = {
+                "1": "1단계 (낮음)",
+                "2": "2단계 (약간낮음)",
+                "3": "3단계 (보통)",
+                "4": "4단계 (높음)",
+                "5": "5단계 (매우높음)"
+            };
+            el.textContent = labels[val] || `${val}단계`;
+        }
 
-            // Platform Collision & Crumbling logic
-            this.grounded = false;
-            for (let p of platforms) {
-              if (
-                this.x < p.x + p.w &&
-                this.x + this.width > p.x &&
-                this.y < p.y + p.h &&
-                this.y + this.height > p.y
-              ) {
-                if (this.vy > 0 && this.y + this.height - this.vy <= p.y + 12) {
-                  this.y = p.y - this.height;
-                  this.vy = 0;
-                  this.grounded = true;
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                renderAll();
+                if (isAudioPlaying) startBgmEngine();
+            }
+        }
 
-                  // Trigger Crumbling Platform
-                  if (p.crumbling && !p.triggered) {
-                    p.triggered = true;
-                    p.collapseTimer = 18; // collapses in 0.3s
-                    audio.playCrumble();
-                  }
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            renderAll();
+            if (isAudioPlaying) startBgmEngine();
+        }
+
+        function clearAllTasks() {
+            if (tasks.length === 0) return;
+            tasks = [];
+            renderAll();
+            if (isAudioPlaying) startBgmEngine();
+        }
+
+        function renderAll() {
+            // Header stats
+            const totalCount = tasks.length;
+            const activeTasks = tasks.filter(t => !t.completed);
+            const completedTasks = tasks.filter(t => t.completed);
+
+            const taskCountEl = document.getElementById('headerTaskCount');
+            if (taskCountEl) taskCountEl.textContent = totalCount;
+
+            const inputCountBadge = document.getElementById('inputCountBadge');
+            if (inputCountBadge) inputCountBadge.textContent = `${totalCount}개`;
+
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            if (analyzeBtn) analyzeBtn.disabled = tasks.length === 0;
+
+            // Render Page 1 List
+            const p1List = document.getElementById('p1TaskList');
+            const p1Empty = document.getElementById('p1EmptyState');
+
+            if (p1List && p1Empty) {
+                if (tasks.length === 0) {
+                    p1List.innerHTML = '';
+                    p1Empty.classList.remove('hidden');
+                } else {
+                    p1Empty.classList.add('hidden');
+                    p1List.innerHTML = tasks.map(t => {
+                        const adjustedMin = Math.round(t.duration * t.difficulty);
+                        return `
+                            <div class="p-3 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200 transition flex items-center justify-between gap-3 ${t.completed ? 'opacity-50 line-through' : ''}">
+                                <div class="flex items-center gap-3 overflow-hidden">
+                                    <input type="checkbox" ${t.completed ? 'checked' : ''} onclick="toggleTask(${t.id})" 
+                                           class="w-4 h-4 text-brand-500 rounded border-slate-300 focus:ring-brand-500 cursor-pointer">
+                                    <div class="truncate">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs font-black text-slate-800 truncate">${escapeHtml(t.name)}</span>
+                                            <span class="text-[10px] bg-brand-50 text-brand-700 font-bold px-2 py-0.5 rounded-md border border-brand-100">${escapeHtml(t.subject)}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                                            <span><i class="fa-regular fa-clock"></i> ${escapeHtml(t.deadlineText)}</span>
+                                            <span>•</span>
+                                            <span>예상: ${t.duration}분 (보정: ${adjustedMin}분)</span>
+                                            <span>•</span>
+                                            <span>중요도 ${t.importance}단계</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onclick="deleteTask(${t.id})" class="text-slate-400 hover:text-red-500 p-1.5 transition">
+                                    <i class="fa-solid fa-xmark text-sm"></i>
+                                </button>
+                            </div>
+                        `;
+                    }).join('');
                 }
-              }
             }
 
-            // Hazards (Spikes, Darts, Stalactites, Pendulums)
-            for (let h of hazards) {
-              if (
-                this.x < h.x + h.w &&
-                this.x + this.width > h.x &&
-                this.y < h.y + h.h &&
-                this.y + this.height > h.y
-              ) {
-                this.takeDamage();
-              }
+            // Calculate Priority Scores for Page 2
+            const ranked = [...tasks].map(t => {
+                const adjustedTime = Math.round(t.duration * t.difficulty);
+                const priorityScore = (t.importance * 20) + (t.difficulty * 15) - (t.completed ? 1000 : 0);
+                return { ...t, adjustedTime, priorityScore };
+            }).sort((a, b) => b.priorityScore - a.priorityScore);
+
+            // Page 2 Stats
+            const resTotalCount = document.getElementById('resTotalCount');
+            if (resTotalCount) resTotalCount.textContent = `${activeTasks.length}개`;
+
+            const totalTimeMinutes = activeTasks.reduce((acc, curr) => acc + Math.round(curr.duration * curr.difficulty), 0);
+            const resTotalTime = document.getElementById('resTotalTime');
+            if (resTotalTime) resTotalTime.textContent = `${totalTimeMinutes}분`;
+
+            const urgentCount = activeTasks.filter(t => t.importance >= 4 || t.difficulty >= 1.3).length;
+            const resUrgentCount = document.getElementById('resUrgentCount');
+            if (resUrgentCount) resUrgentCount.textContent = `${urgentCount}개`;
+
+            // Page 2 Priority Cards
+            const priorityList = document.getElementById('priorityTaskList');
+            if (priorityList) {
+                if (tasks.length === 0) {
+                    priorityList.innerHTML = `<div class="bg-white rounded-2xl p-8 text-center text-slate-400 text-xs">등록된 숙제가 없습니다. 1단계에서 숙제를 먼저 추가해주세요.</div>`;
+                } else {
+                    priorityList.innerHTML = ranked.map((t, index) => {
+                        const rankLabel = index === 0 ? "1순위 (최우선)" : index === 1 ? "2순위 (우선)" : index === 2 ? "3순위 (보통)" : `${index + 1}순위`;
+                        const badgeColor = index === 0 ? "bg-red-500 text-white" : index === 1 ? "bg-amber-500 text-white" : "bg-brand-500 text-white";
+                        
+                        return `
+                            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm transition space-y-3 ${t.completed ? 'opacity-60 bg-slate-50' : ''}">
+                                <div class="flex justify-between items-start gap-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="${badgeColor} text-xs font-black px-3 py-1 rounded-xl shadow-sm">${rankLabel}</span>
+                                        <h4 class="font-extrabold text-sm text-slate-900 ${t.completed ? 'line-through' : ''}">${escapeHtml(t.name)}</h4>
+                                    </div>
+                                    <button onclick="toggleTask(${t.id})" class="text-xs px-3 py-1.5 rounded-xl border ${t.completed ? 'bg-slate-200 text-slate-600 border-slate-300' : 'bg-brand-50 text-brand-700 border-brand-200 font-bold'}">
+                                        ${t.completed ? '완료됨 ✓' : '완료 처리'}
+                                    </button>
+                                </div>
+
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-1">
+                                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                        <span class="text-[10px] text-slate-400 block font-medium">학원 / 과목</span>
+                                        <span class="font-bold text-slate-700">${escapeHtml(t.subject)}</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                        <span class="text-[10px] text-slate-400 block font-medium">마감 시간</span>
+                                        <span class="font-bold text-slate-700">${escapeHtml(t.deadlineText)}</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                        <span class="text-[10px] text-slate-400 block font-medium">추천 투자시간</span>
+                                        <span class="font-bold text-brand-600">${t.adjustedTime}분 (난이도 보정)</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                        <span class="text-[10px] text-slate-400 block font-medium">중요도 / 엄격도</span>
+                                        <span class="font-bold text-amber-600">${t.importance}단계</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
             }
 
-            for (let d of darts) {
-              if (d.active && Math.hypot(this.x - d.x, this.y - d.y) < 16) {
-                this.takeDamage();
-              }
+            // Page 3 Visual Graph Report
+            const doneCount = completedTasks.length;
+            const remCount = activeTasks.length;
+            const percent = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+
+            const progressCircle = document.getElementById('progressCircle');
+            if (progressCircle) {
+                progressCircle.setAttribute('stroke-dasharray', `${percent}, 100`);
             }
 
-            for (let st of stalactites) {
-              if (
-                st.falling &&
-                this.x < st.x + st.w &&
-                this.x + this.width > st.x &&
-                this.y < st.y + st.h &&
-                this.y + this.height > st.y
-              ) {
-                this.takeDamage();
-              }
+            const progressPercent = document.getElementById('progressPercent');
+            if (progressPercent) progressPercent.textContent = `${percent}%`;
+
+            const progressSubText = document.getElementById('progressSubText');
+            if (progressSubText) progressSubText.textContent = `${doneCount} / ${totalCount} 완료`;
+
+            const doneCountText = document.getElementById('doneCountText');
+            if (doneCountText) doneCountText.textContent = `${doneCount}개`;
+
+            const remainingCountText = document.getElementById('remainingCountText');
+            if (remainingCountText) remainingCountText.textContent = `${remCount}개`;
+
+            // Subject Bar Graph Container
+            const barContainer = document.getElementById('barGraphContainer');
+            if (barContainer) {
+                if (tasks.length === 0) {
+                    barContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">등록된 숙제가 없어 그래프를 생성할 수 없습니다.</p>`;
+                } else {
+                    const maxTime = Math.max(...tasks.map(t => Math.round(t.duration * t.difficulty)), 1);
+                    barContainer.innerHTML = tasks.map(t => {
+                        const adjTime = Math.round(t.duration * t.difficulty);
+                        const widthPct = Math.min(Math.round((adjTime / maxTime) * 100), 100);
+                        const barBg = t.completed ? "bg-slate-300" : t.importance >= 4 ? "bg-amber-500" : "bg-brand-500";
+
+                        return `
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-xs font-bold">
+                                    <span class="text-slate-800 ${t.completed ? 'line-through text-slate-400' : ''}">${escapeHtml(t.name)} (${escapeHtml(t.subject)})</span>
+                                    <span class="text-slate-600">${adjTime}분</span>
+                                </div>
+                                <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                                    <div class="h-full ${barBg} transition-all duration-500 rounded-full" style="width: ${widthPct}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
             }
 
-            // Fall into Lava / Pit
-            if (this.y > V_HEIGHT + 60) {
-              this.takeDamage(3);
-            }
-          }
-        } 
-        else if (currentMode === MODE.RUNNER) {
-          // 3-Lane Escape Runner Controls
-          const lanePositions = [200, 400, 600];
-          this.targetLaneX = lanePositions[this.lane];
-          this.runnerX += (this.targetLaneX - this.runnerX) * 0.25;
+            const graphTotalHours = document.getElementById('graphTotalHours');
+            if (graphTotalHours) graphTotalHours.textContent = `총 필요 소요시간: ${totalTimeMinutes}분`;
 
-          if (this.runnerJumping) {
-            this.runnerY += this.runnerVy;
-            this.runnerVy += 0.52; // Gravity
-            if (this.runnerY >= 320) {
-              this.runnerY = 320;
-              this.runnerJumping = false;
-            }
-          }
-
-          if (this.runnerSliding) {
-            this.runnerSlideTimer--;
-            if (this.runnerSlideTimer <= 0) {
-              this.runnerSliding = false;
-            }
-          }
+            updateBgmModeByUrgency();
+            updateBgmUi();
         }
 
-        this.animTimer++;
-        if (this.animTimer % 7 === 0) {
-          this.animFrame = (this.animFrame + 1) % 4;
-        }
-      }
-
-      takeDamage(amount = 1) {
-        if (this.invulnerableTimer > 0) return;
-        this.hp -= amount;
-        this.invulnerableTimer = 60;
-        cameraShake = 18;
-        audio.playHurt();
-
-        if (this.hp <= 0) {
-          endGame(false, "You succumbed to the extreme tomb traps!");
-        }
-      }
-
-      draw() {
-        ctx.save();
-        if (this.invulnerableTimer % 6 > 3) {
-          ctx.restore();
-          return;
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        if (currentMode === MODE.PARKOUR) {
-          ctx.translate(Math.floor(this.x - cameraX), Math.floor(this.y));
-
-          // Grapple Cable Line
-          if (this.isGrappling && this.grappleTarget) {
-            ctx.strokeStyle = '#f59e0b';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(12, 10);
-            ctx.lineTo(this.grappleTarget.x - (this.x - 12), this.grappleTarget.y - this.y);
-            ctx.stroke();
-          }
-
-          // Wall Run Angle Tilt
-          if (this.isWallRunning) {
-            ctx.rotate(0.2);
-          }
-
-          // Explorer Character Sprite Rendering
-          ctx.fillStyle = '#78350f'; // Brown Hat
-          ctx.fillRect(this.facing === 1 ? 2 : -2, -4, 22, 6);
-          ctx.fillRect(6, -8, 12, 5);
-
-          ctx.fillStyle = '#fcd34d'; // Skin/hair
-          ctx.fillRect(4, 2, 16, 8);
-
-          ctx.fillStyle = '#d97706'; // Explorer Shirt
-          ctx.fillRect(2, 10, 20, 14);
-
-          ctx.fillStyle = '#1e293b'; // Pants
-          const legOffset = (this.vx !== 0) ? (this.animFrame % 2 === 0 ? 4 : -4) : 0;
-          ctx.fillRect(4, 24, 6, 12 + legOffset);
-          ctx.fillRect(14, 24, 6, 12 - legOffset);
-        } else if (currentMode === MODE.RUNNER) {
-          ctx.translate(Math.floor(this.runnerX), Math.floor(this.runnerY));
-
-          if (this.runnerSliding) {
-            ctx.fillStyle = '#d97706';
-            ctx.fillRect(-15, -10, 30, 12);
-          } else {
-            ctx.fillStyle = '#78350f'; // Hat
-            ctx.fillRect(-12, -45, 24, 6);
-
-            ctx.fillStyle = '#fcd34d'; // Head
-            ctx.fillRect(-10, -39, 20, 10);
-
-            ctx.fillStyle = '#d97706'; // Body
-            ctx.fillRect(-12, -29, 24, 18);
-
-            ctx.fillStyle = '#1e293b'; // Legs
-            const legShift = (this.animFrame % 2 === 0 ? 5 : -5);
-            ctx.fillRect(-10, -11, 8, 15 + legShift);
-            ctx.fillRect(2, -11, 8, 15 - legShift);
-          }
-        }
-
-        ctx.restore();
-      }
-    }
-
-    class SafeSystem {
-      constructor() {
-        this.angle = 0;
-        this.speed = 0.045;
-        this.targetAngleMin = Math.PI * 0.8;
-        this.targetAngleMax = Math.PI * 1.2;
-        this.hitsNeeded = 3;
-        this.currentHits = 0;
-      }
-
-      reset() {
-        this.angle = 0;
-        this.speed = 0.048;
-        this.currentHits = 0;
-        this.randomizeTarget();
-      }
-
-      randomizeTarget() {
-        const start = Math.random() * Math.PI * 1.4 + 0.3;
-        this.targetAngleMin = start;
-        this.targetAngleMax = start + 0.42;
-      }
-
-      update() {
-        if (currentMode !== MODE.SAFE) return;
-        this.angle = (this.angle + this.speed) % (Math.PI * 2);
-      }
-
-      attemptLock() {
-        if (currentMode !== MODE.SAFE) return;
-
-        if (this.angle >= this.targetAngleMin && this.angle <= this.targetAngleMax) {
-          this.currentHits++;
-          audio.playClick(true);
-          cameraShake = 6;
-          if (this.currentHits >= this.hitsNeeded) {
-            // Vault Unlocked!
-            currentMode = MODE.RUNNER;
-            updateModeBadge();
-            startEscapeTimer();
-            audio.playAlarm();
-          } else {
-            this.speed += 0.018;
-            this.randomizeTarget();
-          }
-        } else {
-          audio.playClick(false);
-          player.takeDamage(1);
-        }
-      }
-
-      draw() {
-        if (currentMode !== MODE.SAFE) return;
-
-        // Vault Safe Dial UI Overlay
-        ctx.save();
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
-        ctx.fillRect(150, 40, 500, 360);
-        ctx.strokeStyle = '#f59e0b';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(150, 40, 500, 360);
-
-        ctx.font = '16px "Press Start 2P"';
-        ctx.fillStyle = '#facc15';
-        ctx.textAlign = 'center';
-        ctx.fillText("CRACK THE ANCIENT SAFE!", 400, 80);
-        ctx.font = '12px "Rajdhani"';
-        ctx.fillStyle = '#cbd5e1';
-        ctx.fillText(`UNLOCK PROGRESS: ${this.currentHits}/${this.hitsNeeded} LOCK PINS`, 400, 105);
-
-        const centerX = 400;
-        const centerY = 240;
-        const radius = 90;
-
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-        ctx.fillStyle = '#292524';
-        ctx.fill();
-        ctx.strokeStyle = '#d97706';
-        ctx.lineWidth = 6;
-        ctx.stroke();
-
-        // Target Zone
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, this.targetAngleMin, this.targetAngleMax);
-        ctx.strokeStyle = '#22c55e';
-        ctx.lineWidth = 12;
-        ctx.stroke();
-
-        // Moving Needle
-        const needleX = centerX + Math.cos(this.angle) * (radius - 10);
-        const needleY = centerY + Math.sin(this.angle) * (radius - 10);
-
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.lineTo(needleX, needleY);
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 5;
-        ctx.stroke();
-
-        ctx.font = '13px "Press Start 2P"';
-        ctx.fillStyle = '#f59e0b';
-        ctx.fillText("PRESS [SPACE / JUMP] ON GREEN!", 400, 370);
-
-        ctx.restore();
-      }
-    }
-
-    class RunnerObstacleManager {
-      constructor() {
-        this.obstacles = [];
-        this.coins = [];
-        this.spawnTimer = 0;
-        this.speed = 6.5;
-      }
-
-      reset() {
-        this.obstacles = [];
-        this.coins = [];
-        this.spawnTimer = 0;
-        this.speed = 6.5;
-      }
-
-      update() {
-        if (currentMode !== MODE.RUNNER) return;
-
-        this.spawnTimer++;
-        if (this.spawnTimer > 32) {
-          this.spawnTimer = 0;
-          const lane = Math.floor(Math.random() * 3);
-          const type = Math.random() > 0.45 ? 'pillar' : 'low_barrier';
-          this.obstacles.push({
-            lane: lane,
-            y: 80,
-            size: 10,
-            type: type
-          });
-
-          if (Math.random() > 0.4) {
-            this.coins.push({
-              lane: (lane + 1) % 3,
-              y: 80,
-              size: 8
-            });
-          }
-        }
-
-        // Update Obstacles
-        for (let i = this.obstacles.length - 1; i >= 0; i--) {
-          let obs = this.obstacles[i];
-          obs.y += this.speed;
-          obs.size += 0.4;
-
-          if (obs.y > 300 && obs.y < 340 && obs.lane === player.lane) {
-            if (obs.type === 'pillar' && !player.runnerSliding) {
-              player.takeDamage(1);
-              this.obstacles.splice(i, 1);
-            } else if (obs.type === 'low_barrier' && !player.runnerJumping) {
-              player.takeDamage(1);
-              this.obstacles.splice(i, 1);
-            }
-          }
-
-          if (obs.y > V_HEIGHT + 50) {
-            this.obstacles.splice(i, 1);
-          }
-        }
-
-        // Update Coins
-        for (let i = this.coins.length - 1; i >= 0; i--) {
-          let c = this.coins[i];
-          c.y += this.speed;
-
-          if (c.y > 300 && c.y < 340 && c.lane === player.lane) {
-            coinsCollected++;
-            score += 150;
-            audio.playCoin();
-            this.coins.splice(i, 1);
-          } else if (c.y > V_HEIGHT + 50) {
-            this.coins.splice(i, 1);
-          }
-        }
-      }
-
-      draw() {
-        if (currentMode !== MODE.RUNNER) return;
-
-        ctx.save();
-        const lanesX = [200, 400, 600];
-
-        ctx.fillStyle = '#1c1917';
-        ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
-
-        // Draw 3 Lanes
-        for (let x of lanesX) {
-          ctx.strokeStyle = '#d97706';
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.moveTo(400, 80);
-          ctx.lineTo(x, V_HEIGHT);
-          ctx.stroke();
-        }
-
-        // Rolling Boulder Shadow Behind Player
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
-        ctx.beginPath();
-        ctx.ellipse(400, 420, 310, 42, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Draw Obstacles
-        for (let obs of this.obstacles) {
-          const laneX = lanesX[obs.lane];
-          const scale = (obs.y / 320);
-          const drawX = 400 + (laneX - 400) * scale;
-
-          if (obs.type === 'pillar') {
-            ctx.fillStyle = '#9a3412';
-            ctx.fillRect(drawX - 25 * scale, obs.y - 60 * scale, 50 * scale, 20 * scale);
-            ctx.fillRect(drawX - 25 * scale, obs.y - 60 * scale, 10 * scale, 60 * scale);
-            ctx.fillRect(drawX + 15 * scale, obs.y - 60 * scale, 10 * scale, 60 * scale);
-          } else {
-            ctx.fillStyle = '#dc2626';
-            ctx.fillRect(drawX - 20 * scale, obs.y - 15 * scale, 40 * scale, 15 * scale);
-          }
-        }
-
-        // Draw Coins
-        for (let c of this.coins) {
-          const laneX = lanesX[c.lane];
-          const scale = (c.y / 320);
-          const drawX = 400 + (laneX - 400) * scale;
-
-          ctx.fillStyle = '#facc15';
-          ctx.beginPath();
-          ctx.arc(drawX, c.y - 10 * scale, 10 * scale, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        ctx.restore();
-      }
-    }
-
-    const player = new Player();
-    const safeSystem = new SafeSystem();
-    const runnerManager = new RunnerObstacleManager();
-
-    let platforms = [];
-    let hazards = [];
-    let coins = [];
-    let hooks = [];
-    let wallRunStrips = [];
-    let darts = [];
-    let stalactites = [];
-    let pendulums = [];
-    let vaultDoor = null;
-
-    function buildLevel() {
-      platforms = [];
-      hazards = [];
-      coins = [];
-      hooks = [];
-      wallRunStrips = [];
-      darts = [];
-      stalactites = [];
-      pendulums = [];
-
-      let currX = 0;
-
-      // Start Safe Zone
-      platforms.push({ x: 0, y: 380, w: 450, h: 70, crumbling: false });
-      currX = 450;
-
-      // Procedurally Generate 3500m Hardcore Parkour Track
-      while (currX < PARKOUR_TOTAL_DIST) {
-        const pattern = Math.floor(Math.random() * 6);
-
-        if (pattern === 0) {
-          // Crumbling Bridge Sequence
-          for (let i = 0; i < 4; i++) {
-            platforms.push({
-              x: currX,
-              y: 380 - (i % 2) * 20,
-              w: 110,
-              h: 20,
-              crumbling: true,
-              triggered: false,
-              collapseTimer: 0
-            });
-            coins.push({ x: currX + 55, y: 340, collected: false });
-            currX += 160;
-          }
-        } 
-        else if (pattern === 1) {
-          // Grappling Hook Rings over Lava Pits
-          hooks.push({ x: currX + 120, y: 160 });
-          hazards.push({ x: currX, y: 430, w: 280, h: 20 });
-          currX += 280;
-          platforms.push({ x: currX, y: 360, w: 180, h: 90, crumbling: false });
-          currX += 180;
-        } 
-        else if (pattern === 2) {
-          // Wall-Run Strip over Spike Pits
-          wallRunStrips.push({ x: currX, y: 220, w: 260, h: 120 });
-          hazards.push({ x: currX, y: 430, w: 260, h: 20 });
-          currX += 260;
-          platforms.push({ x: currX, y: 360, w: 160, h: 90, crumbling: false });
-          currX += 160;
-        } 
-        else if (pattern === 3) {
-          // Swinging Pendulum Blades & Darts
-          platforms.push({ x: currX, y: 380, w: 320, h: 70, crumbling: false });
-          pendulums.push({ x: currX + 100, y: 200, length: 170, angle: 0 });
-          darts.push({ x: currX + 220, y: 350, active: true, timer: 0 });
-          coins.push({ x: currX + 160, y: 340, collected: false });
-          currX += 320;
-        } 
-        else if (pattern === 4) {
-          // Falling Stalactites Section
-          platforms.push({ x: currX, y: 380, w: 350, h: 70, crumbling: false });
-          stalactites.push({ x: currX + 120, y: 40, w: 20, h: 40, falling: false, vy: 0 });
-          stalactites.push({ x: currX + 240, y: 40, w: 20, h: 40, falling: false, vy: 0 });
-          currX += 350;
-        } 
-        else {
-          // High-Low Platform Jump Gimmick
-          platforms.push({ x: currX, y: 300, w: 130, h: 20, crumbling: false });
-          platforms.push({ x: currX + 180, y: 240, w: 130, h: 20, crumbling: false });
-          coins.push({ x: currX + 240, y: 200, collected: false });
-          currX += 340;
-        }
-      }
-
-      // Final Vault Platform at end of 3500m
-      platforms.push({ x: currX, y: 380, w: 500, h: 70, crumbling: false });
-      vaultDoor = { x: currX + 280, y: 260, w: 70, h: 120, triggered: false };
-    }
-
-    function startEscapeTimer() {
-      timerActive = true;
-      escapeTimer = 30.0;
-      document.getElementById('timerDisplay').classList.remove('hidden');
-    }
-
-    window.addEventListener('keydown', (e) => {
-      audio.init();
-
-      if (currentMode === MODE.PARKOUR) {
-        if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
-        if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
-        if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') {
-          if (!keys.up) keys.jumpPressed = true;
-          keys.up = true;
-        }
-        if (e.code === 'ArrowDown' || e.code === 'KeyS') {
-          if (!keys.down) keys.downPressed = true;
-          keys.down = true;
-        }
-      } 
-      else if (currentMode === MODE.SAFE) {
-        if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
-          safeSystem.attemptLock();
-        }
-      } 
-      else if (currentMode === MODE.RUNNER) {
-        if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
-          if (player.lane > 0) player.lane--;
-        }
-        if (e.code === 'ArrowRight' || e.code === 'KeyD') {
-          if (player.lane < 2) player.lane++;
-        }
-        if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') {
-          if (!player.runnerJumping) {
-            player.runnerJumping = true;
-            player.runnerVy = -10.5;
-            audio.playJump();
-          }
-        }
-        if (e.code === 'ArrowDown' || e.code === 'KeyS') {
-          if (!player.runnerSliding) {
-            player.runnerSliding = true;
-            player.runnerSlideTimer = 25;
-          }
-        }
-      }
-    });
-
-    window.addEventListener('keyup', (e) => {
-      if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
-      if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
-      if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') keys.up = false;
-      if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.down = false;
-    });
-
-    // Touch Support for Mobile
-    const bindTouch = (id, action) => {
-      const btn = document.getElementById(id);
-      if (!btn) return;
-      btn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        audio.init();
-        if (currentMode === MODE.SAFE) {
-          safeSystem.attemptLock();
-        } else if (currentMode === MODE.RUNNER) {
-          if (action === 'left' && player.lane > 0) player.lane--;
-          if (action === 'right' && player.lane < 2) player.lane++;
-          if (action === 'jump' && !player.runnerJumping) {
-            player.runnerJumping = true;
-            player.runnerVy = -10.5;
-            audio.playJump();
-          }
-          if (action === 'down' && !player.runnerSliding) {
-            player.runnerSliding = true;
-            player.runnerSlideTimer = 25;
-          }
-        } else {
-          if (action === 'left') keys.left = true;
-          if (action === 'right') keys.right = true;
-          if (action === 'jump') { keys.jumpPressed = true; keys.up = true; }
-          if (action === 'down') { keys.downPressed = true; keys.down = true; }
-        }
-      });
-      btn.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        if (action === 'left') keys.left = false;
-        if (action === 'right') keys.right = false;
-        if (action === 'jump') keys.up = false;
-        if (action === 'down') keys.down = false;
-      });
-    };
-    bindTouch('btnLeft', 'left');
-    bindTouch('btnRight', 'right');
-    bindTouch('btnJump', 'jump');
-    bindTouch('btnDown', 'down');
-
-    function updateModeBadge() {
-      const badge = document.getElementById('modeBadge');
-      badge.innerText = `MODE: ${currentMode}`;
-      if (currentMode === MODE.SAFE) {
-        badge.className = "pixel-font text-xs sm:text-sm px-3 py-1.5 rounded-md bg-purple-600/40 border border-purple-400 text-purple-200 animate-pulse";
-      } else if (currentMode === MODE.RUNNER) {
-        badge.className = "pixel-font text-xs sm:text-sm px-3 py-1.5 rounded-md bg-red-600/40 border border-red-500 text-red-300 animate-bounce";
-      } else {
-        badge.className = "pixel-font text-xs sm:text-sm px-3 py-1.5 rounded-md bg-amber-600/30 border border-amber-400 text-amber-300";
-      }
-    }
-
-    function update() {
-      if (!gameRunning) return;
-
-      player.update(platforms, hazards, hooks, wallRunStrips, darts, stalactites);
-
-      if (currentMode === MODE.PARKOUR) {
-        const targetCamX = player.x - V_WIDTH / 3;
-        cameraX += (targetCamX - cameraX) * 0.12;
-        if (cameraX < 0) cameraX = 0;
-
-        // Update Crumbling Platforms
-        for (let i = platforms.length - 1; i >= 0; i--) {
-          let p = platforms[i];
-          if (p.triggered) {
-            p.collapseTimer--;
-            if (p.collapseTimer <= 0) {
-              platforms.splice(i, 1);
-            }
-          }
-        }
-
-        // Update Pendulum Blades
-        for (let pen of pendulums) {
-          pen.angle += 0.04;
-          const bladeX = pen.x + Math.sin(pen.angle) * pen.length;
-          const bladeY = pen.y + Math.cos(pen.angle) * pen.length;
-          if (Math.hypot(player.x - bladeX, player.y - bladeY) < 28) {
-            player.takeDamage(1);
-          }
-        }
-
-        // Update Falling Stalactites
-        for (let st of stalactites) {
-          if (!st.falling && Math.abs(player.x - st.x) < 140) {
-            st.falling = true;
-          }
-          if (st.falling) {
-            st.vy += 0.6;
-            st.y += st.vy;
-          }
-        }
-
-        // Check distance progress
-        const currentDist = Math.min(PARKOUR_TOTAL_DIST, Math.floor(player.x));
-        document.getElementById('distText').innerText = `${currentDist}m / ${PARKOUR_TOTAL_DIST}m`;
-        document.getElementById('distFill').style.width = `${(currentDist / PARKOUR_TOTAL_DIST) * 100}%`;
-
-        // Reach Vault Door
-        if (player.x + player.width > vaultDoor.x && !vaultDoor.triggered) {
-          vaultDoor.triggered = true;
-          currentMode = MODE.SAFE;
-          updateModeBadge();
-          safeSystem.reset();
-          document.getElementById('parkourProgressBar').classList.add('hidden');
-        }
-
-        for (let c of coins) {
-          if (!c.collected && Math.hypot(player.x - c.x, player.y - c.y) < 25) {
-            c.collected = true;
-            coinsCollected++;
-            score += 100;
-            audio.playCoin();
-          }
-        }
-      } else if (currentMode === MODE.SAFE) {
-        safeSystem.update();
-      } else if (currentMode === MODE.RUNNER) {
-        runnerManager.update();
-
-        if (timerActive) {
-          escapeTimer -= 1 / 60;
-          if (escapeTimer <= 0) {
-            escapeTimer = 0;
-            endGame(false, "Time ran out! The tomb collapsed on you!");
-          }
-          document.getElementById('timerText').innerText = escapeTimer.toFixed(1);
-
-          if (score >= 2200 && escapeTimer > 0) {
-            endGame(true, "VICTORY! You escaped with the Royal Vault treasures!");
-          }
-        }
-      }
-
-      if (cameraShake > 0) cameraShake--;
-
-      document.getElementById('scoreText').innerText = String(score).padStart(5, '0');
-      document.getElementById('coinText').innerText = coinsCollected;
-      document.getElementById('heartsContainer').innerText = '❤️'.repeat(Math.max(0, player.hp));
-    }
-
-    function draw() {
-      ctx.save();
-
-      const shakeX = (Math.random() - 0.5) * cameraShake;
-      const shakeY = (Math.random() - 0.5) * cameraShake;
-      ctx.translate(shakeX, shakeY);
-
-      ctx.fillStyle = '#1c1917';
-      ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
-
-      if (currentMode === MODE.PARKOUR) {
-        // Grid background
-        ctx.strokeStyle = '#292524';
-        for (let x = -40; x < V_WIDTH + 40; x += 40) {
-          for (let y = 0; y < V_HEIGHT; y += 30) {
-            ctx.strokeRect(x - (cameraX % 40), y, 40, 30);
-          }
-        }
-
-        // Draw Wall Run Strips
-        for (let wr of wallRunStrips) {
-          ctx.fillStyle = '#451a03';
-          ctx.fillRect(wr.x - cameraX, wr.y, wr.w, wr.h);
-          ctx.strokeStyle = '#f59e0b';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(wr.x - cameraX, wr.y, wr.w, wr.h);
-          ctx.font = '10px "Press Start 2P"';
-          ctx.fillStyle = '#facc15';
-          ctx.fillText("WALL RUN", wr.x - cameraX + 80, wr.y + 20);
-        }
-
-        // Draw Grapple Hooks
-        for (let hk of hooks) {
-          ctx.strokeStyle = '#f59e0b';
-          ctx.lineWidth = 4;
-          ctx.beginPath();
-          ctx.arc(hk.x - cameraX, hk.y, 14, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.fillStyle = '#fef08a';
-          ctx.beginPath();
-          ctx.arc(hk.x - cameraX, hk.y, 5, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        // Draw Platforms
-        for (let p of platforms) {
-          ctx.fillStyle = p.crumbling ? (p.triggered ? '#ef4444' : '#b45309') : '#d97706';
-          ctx.fillRect(p.x - cameraX, p.y, p.w, p.h);
-          ctx.strokeStyle = '#78350f';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(p.x - cameraX, p.y, p.w, p.h);
-        }
-
-        // Draw Hazards (Spikes / Lava)
-        for (let h of hazards) {
-          ctx.fillStyle = '#dc2626';
-          ctx.fillRect(h.x - cameraX, h.y, h.w, h.h);
-        }
-
-        // Draw Pendulum Blades
-        for (let pen of pendulums) {
-          const bladeX = pen.x + Math.sin(pen.angle) * pen.length;
-          const bladeY = pen.y + Math.cos(pen.angle) * pen.length;
-          ctx.strokeStyle = '#94a3b8';
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.moveTo(pen.x - cameraX, pen.y);
-          ctx.lineTo(bladeX - cameraX, bladeY);
-          ctx.stroke();
-
-          ctx.fillStyle = '#ef4444';
-          ctx.beginPath();
-          ctx.arc(bladeX - cameraX, bladeY, 16, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        // Draw Falling Stalactites
-        for (let st of stalactites) {
-          ctx.fillStyle = '#9a3412';
-          ctx.beginPath();
-          ctx.moveTo(st.x - cameraX, st.y);
-          ctx.lineTo(st.x - cameraX + st.w / 2, st.y + st.h);
-          ctx.lineTo(st.x - cameraX + st.w, st.y);
-          ctx.closePath();
-          ctx.fill();
-        }
-
-        // Draw Gold Coins
-        for (let c of coins) {
-          if (!c.collected) {
-            ctx.fillStyle = '#facc15';
-            ctx.beginPath();
-            ctx.arc(c.x - cameraX, c.y, 6, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-
-        // Draw Vault Door
-        ctx.fillStyle = '#78350f';
-        ctx.fillRect(vaultDoor.x - cameraX, vaultDoor.y, vaultDoor.w, vaultDoor.h);
-        ctx.fillStyle = '#f59e0b';
-        ctx.beginPath();
-        ctx.arc(vaultDoor.x - cameraX + 35, vaultDoor.y + 60, 20, 0, Math.PI * 2);
-        ctx.fill();
-
-        player.draw();
-      } else if (currentMode === MODE.SAFE) {
-        safeSystem.draw();
-      } else if (currentMode === MODE.RUNNER) {
-        runnerManager.draw();
-        player.draw();
-      }
-
-      ctx.restore();
-    }
-
-    function loop() {
-      update();
-      draw();
-      requestAnimationFrame(loop);
-    }
-
-    function startGame() {
-      document.getElementById('startOverlay').classList.add('hidden');
-      document.getElementById('endOverlay').classList.add('hidden');
-      document.getElementById('parkourProgressBar').classList.remove('hidden');
-      score = 0;
-      coinsCollected = 0;
-      timerActive = false;
-      document.getElementById('timerDisplay').classList.add('hidden');
-      currentMode = MODE.PARKOUR;
-      updateModeBadge();
-      buildLevel();
-      runnerManager.reset();
-      player.reset();
-      gameRunning = true;
-    }
-
-    function endGame(victory, message) {
-      gameRunning = false;
-      const endOverlay = document.getElementById('endOverlay');
-      const endTitle = document.getElementById('endTitle');
-      const endSubtitle = document.getElementById('endSubtitle');
-
-      if (victory) {
-        endTitle.innerText = "VICTORY!";
-        endTitle.className = "pixel-font text-3xl sm:text-5xl text-amber-400 mb-2 drop-shadow";
-      } else {
-        endTitle.innerText = "GAME OVER";
-        endTitle.className = "pixel-font text-3xl sm:text-5xl text-red-500 mb-2";
-      }
-
-      endSubtitle.innerText = message;
-      document.getElementById('finalScore').innerText = score;
-      document.getElementById('finalCoins').innerText = coinsCollected;
-      document.getElementById('finalDist').innerText = `${Math.min(PARKOUR_TOTAL_DIST, Math.floor(player.x))}m`;
-      endOverlay.classList.remove('hidden');
-    }
-
-    document.getElementById('startBtn').addEventListener('click', startGame);
-    document.getElementById('restartBtn').addEventListener('click', startGame);
-
-    buildLevel();
-    loop();
-  </script>
+        window.onload = function() {
+            renderAll();
+        };
+    </script>
 </body>
 </html>
