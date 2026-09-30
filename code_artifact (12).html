@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>숙-쓱 :: 스마트 학원 숙제 & 168 BGM 리포트</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        },
+                        accent: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-active {
+            background-color: #ffffff !important;
+            border-color: #10b981 !important;
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.15), 0 8px 10px -6px rgba(16, 185, 129, 0.1) !important;
+        }
+        @keyframes dangerPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.04); }
+        }
+        .danger-pulse {
+            animation: dangerPulse 0.8s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col justify-between selection:bg-brand-100 selection:text-brand-700 pb-28">
+
+    <!-- Top Header Bar -->
+    <header class="bg-white border-b border-slate-200/80 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-brand-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
+                    <i class="fa-solid fa-check-double text-xl"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-black text-2xl text-slate-900 tracking-tight">숙-쓱</h1>
+                        <span class="bg-brand-500 text-white text-[11px] px-2.5 py-0.5 rounded-full font-extrabold tracking-wide">168</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-medium hidden sm:block">일주일 168시간을 지배하는 스마트 클래식 BGM 플래너</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- BGM Status Quick Button -->
+                <button onclick="toggleAudioEngine()" class="flex items-center gap-2 text-xs px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition shadow-sm">
+                    <i id="headerBgmIcon" class="fa-solid fa-music text-brand-500"></i>
+                    <span id="headerBgmText" class="font-bold text-slate-700">BGM: 재생하기</span>
+                </button>
+
+                <span id="headerTotalBadge" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold bg-slate-100 text-slate-600 px-3 py-2 rounded-xl">
+                    <i class="fa-solid fa-layer-group text-brand-500"></i>
+                    등록된 숙제 <span id="headerTaskCount" class="text-brand-600 font-extrabold">0</span>개
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
+
+        <!-- LARGE PROMINENT PAGE TABS -->
+        <nav class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            
+            <!-- Tab 1 Button -->
+            <button id="tabBtn1" onclick="switchTab(1)" 
+                    class="tab-active bg-white border-2 border-brand-500 p-4 sm:p-5 rounded-2xl text-left transition-all duration-200 flex sm:flex-col justify-between items-center sm:items-start group relative overflow-hidden">
+                <div class="flex items-center gap-3 mb-0 sm:mb-2">
+                    <div id="tabIconBg1" class="w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center text-lg font-bold shrink-0 transition">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-extrabold tracking-wider text-brand-600 uppercase block">STEP 01</span>
+                        <h2 id="tabTitle1" class="text-base sm:text-lg font-black text-slate-900">1. 숙제 입력</h2>
+                    </div>
+                </div>
+                <p id="tabDesc1" class="text-xs text-slate-500 hidden sm:block font-medium">숙제 이름, 마감시간, 난이도를 등록하세요</p>
+                <div id="tabIndicator1" class="w-full h-1 bg-brand-500 rounded-full mt-3"></div>
+            </button>
+
+            <!-- Tab 2 Button -->
+            <button id="tabBtn2" onclick="switchTab(2)" 
+                    class="bg-white/80 hover:bg-white border-2 border-slate-200/80 p-4 sm:p-5 rounded-2xl text-left transition-all duration-200 flex sm:flex-col justify-between items-center sm:items-start group relative overflow-hidden">
+                <div class="flex items-center gap-3 mb-0 sm:mb-2">
+                    <div id="tabIconBg2" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center text-lg font-bold shrink-0 transition">
+                        <i class="fa-solid fa-arrow-down-short-wide"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-extrabold tracking-wider text-slate-400 uppercase block">STEP 02</span>
+                        <h2 id="tabTitle2" class="text-base sm:text-lg font-bold text-slate-600">2. 순위 분석</h2>
+                    </div>
+                </div>
+                <p id="tabDesc2" class="text-xs text-slate-400 hidden sm:block font-medium">1순위, 2순위, 3순위 우선순위 솔루션</p>
+                <div id="tabIndicator2" class="w-full h-1 bg-transparent rounded-full mt-3"></div>
+            </button>
+
+            <!-- Tab 3 Button -->
+            <button id="tabBtn3" onclick="switchTab(3)" 
+                    class="bg-white/80 hover:bg-white border-2 border-slate-200/80 p-4 sm:p-5 rounded-2xl text-left transition-all duration-200 flex sm:flex-col justify-between items-center sm:items-start group relative overflow-hidden">
+                <div class="flex items-center gap-3 mb-0 sm:mb-2">
+                    <div id="tabIconBg3" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center text-lg font-bold shrink-0 transition">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-extrabold tracking-wider text-slate-400 uppercase block">STEP 03</span>
+                        <h2 id="tabTitle3" class="text-base sm:text-lg font-bold text-slate-600">3. 시각화 리포트</h2>
+                    </div>
+                </div>
+                <p id="tabDesc3" class="text-xs text-slate-400 hidden sm:block font-medium">그래프와 위급도별 클래식 BGM 모니터링</p>
+                <div id="tabIndicator3" class="w-full h-1 bg-transparent rounded-full mt-3"></div>
+            </button>
+
+        </nav>
+
+        <!-- ================= PAGE 1: HOMEWORK INPUT PAGE ================= -->
+        <section id="page1" class="space-y-6 animate-fade-in">
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+                <!-- Left: Form Input Card -->
+                <div class="md:col-span-5 bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4 self-start">
+                    <div class="border-b border-slate-100 pb-3 flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-plus text-brand-500 text-base"></i> 새로운 숙제 등록
+                        </h3>
+                        <span class="text-[11px] text-slate-400 font-medium">쉬움 · 보통 · 어려움</span>
+                    </div>
+
+                    <form id="homeworkForm" onsubmit="handleAddTask(event)" class="space-y-3.5">
+                        <!-- Task Name -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">숙제 이름 <span class="text-red-500">*</span></label>
+                            <input type="text" id="taskName" required placeholder="예: 수학 워크북 12~15p 풀기"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                        </div>
+
+                        <!-- Academy / Subject -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">학원 / 과목 <span class="text-red-500">*</span></label>
+                            <input type="text" id="taskSubject" required placeholder="예: 대성학원 영어단어 암기"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                        </div>
+
+                        <!-- Flexible Deadline & Duration -->
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">
+                                    마감시간 <span class="text-[10px] text-slate-400 font-normal">(자유입력)</span>
+                                </label>
+                                <input type="text" id="taskDeadlineText" placeholder="예: 오늘 밤, 2시간 뒤"
+                                       class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">
+                                    예상시간 <span class="text-[10px] text-slate-400 font-normal">(분 단위)</span>
+                                </label>
+                                <input type="number" id="taskDuration" min="1" required placeholder="예: 3 (제한없음)"
+                                       class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                            </div>
+                        </div>
+
+                        <!-- Difficulty Selection -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">숙제 난이도</label>
+                            <select id="taskDifficulty"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition bg-white cursor-pointer">
+                                <option value="0.8">🟢 쉬움 (시간 20% 단축 보정)</option>
+                                <option value="1.0" selected>🟡 보통 (예상 소요시간 그대로)</option>
+                                <option value="1.3">🟠 어려움 (집중 보정 +30%)</option>
+                                <option value="1.6">🔴 극상 (막힘/고난도 +60%)</option>
+                            </select>
+                        </div>
+
+                        <!-- Combined Strictness & Importance Slider -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-bold text-slate-700">중요도 & 처벌 엄격도</label>
+                                <span id="importanceVal" class="text-xs font-bold text-amber-600">3단계 (보통)</span>
+                            </div>
+                            <input type="range" id="taskImportance" min="1" max="5" value="3" oninput="updateRangeLabel('importanceVal', this.value)"
+                                   class="w-full accent-amber-500 cursor-pointer h-1.5 bg-slate-100 rounded-lg">
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                                <span>1단계(낮음)</span>
+                                <span>3단계(보통)</span>
+                                <span>5단계(매우높음)</span>
+                            </div>
+                        </div>
+
+                        <!-- Submit Add Button -->
+                        <button type="submit"
+                                class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white font-extrabold rounded-xl shadow-md shadow-brand-500/20 transition flex items-center justify-center gap-2 text-xs mt-2">
+                            <i class="fa-solid fa-plus"></i> 숙제 목록에 추가
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right: Registered Homework List -->
+                <div class="md:col-span-7 space-y-4 flex flex-col justify-between">
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3 flex-grow">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-accent-500 text-base"></i> 입력된 숙제 리스트
+                                <span id="inputCountBadge" class="bg-accent-50 text-accent-600 px-2.5 py-0.5 rounded-full text-xs font-extrabold">0개</span>
+                            </h3>
+                            <button onclick="clearAllTasks()" class="text-[11px] text-slate-400 hover:text-red-500 flex items-center gap-1 transition">
+                                <i class="fa-solid fa-trash-can"></i> 전체 비우기
+                            </button>
+                        </div>
+
+                        <!-- Tasks Dynamic Container -->
+                        <div id="p1TaskList" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                            <!-- Items Populated via JS -->
+                        </div>
+
+                        <!-- Empty State -->
+                        <div id="p1EmptyState" class="py-14 text-center space-y-2.5">
+                            <div class="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300 mx-auto text-2xl">
+                                <i class="fa-solid fa-file-circle-plus"></i>
+                            </div>
+                            <p class="text-xs text-slate-400 font-medium">아직 추가된 숙제가 없습니다.<br>왼쪽 양식에서 오늘 처리해야 할 숙제를 등록해주세요!</p>
+                        </div>
+                    </div>
+
+                    <!-- CTA Button -->
+                    <button id="analyzeBtn" onclick="switchTab(2)" disabled
+                            class="w-full py-4 bg-brand-500 hover:bg-brand-600 disabled:bg-slate-200 disabled:cursor-not-allowed text-white font-black rounded-2xl shadow-lg shadow-brand-500/20 transition text-sm flex items-center justify-center gap-2">
+                        <span>2단계: 순위 분석 및 솔루션 확인하기</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ================= PAGE 2: PRIORITY ANALYSIS PAGE ================= -->
+        <section id="page2" class="space-y-6 hidden animate-fade-in">
+
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-accent-500"></i> AI 스마트 숙제 실행 순위 솔루션
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">처벌 위험도, 난이도 보정 소요시간, 마감 기한을 종합 계산하여 1순위, 2순위, 3순위를 자동 배치했습니다.</p>
+                </div>
+                
+                <button onclick="switchTab(1)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-pen-to-square"></i> 숙제 항목 수정
+                </button>
+            </div>
+
+            <!-- Priority Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-medium text-slate-400">총 미완료 숙제</p>
+                        <h4 id="resTotalCount" class="text-xl font-black text-slate-800 mt-0.5">0개</h4>
+                    </div>
+                    <div class="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center text-brand-600 text-lg">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-medium text-slate-400">총 추천 투자시간</p>
+                        <h4 id="resTotalTime" class="text-xl font-black text-accent-600 mt-0.5">0분</h4>
+                    </div>
+                    <div class="w-10 h-10 bg-accent-50 rounded-xl flex items-center justify-center text-accent-500 text-lg">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-medium text-slate-400">고위험/긴급 숙제</p>
+                        <h4 id="resUrgentCount" class="text-xl font-black text-amber-600 mt-0.5">0개</h4>
+                    </div>
+                    <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500 text-lg">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ranked Homework Cards -->
+            <div id="priorityTaskList" class="space-y-4">
+                <!-- Dynamically populated cards -->
+            </div>
+
+            <!-- Overall Tip Card -->
+            <div class="bg-gradient-to-r from-accent-50 via-white to-brand-50 p-5 rounded-2xl border border-slate-200 space-y-2">
+                <h4 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-lightbulb text-amber-500"></i> 숙-쓱 맞춤 공부 공략 팁
+                </h4>
+                <p id="overallStudyTip" class="text-xs text-slate-600 leading-relaxed">
+                    숙제를 완수할 때마다 체크박스를 클릭하여 지워나가세요. Concentrated study mode로 빠른 몰입을 유도합니다.
+                </p>
+            </div>
+
+        </section>
+
+        <!-- ================= PAGE 3: VISUAL REPORT & GRAPH PAGE ================= -->
+        <section id="page3" class="space-y-6 hidden animate-fade-in">
+
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-brand-500"></i> 숙제 시각화 분석 리포트
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">남은 숙제 양, 투자 시간 비율, 상태별 색상 그래프 및 위급도별 BGM 음악을 모니터링하세요.</p>
+                </div>
+
+                <div class="bg-brand-50 px-3 py-1.5 rounded-xl border border-brand-100 flex items-center gap-2 text-xs font-bold text-brand-700">
+                    <i class="fa-solid fa-bolt"></i> 168 시간 관리 모드
+                </div>
+            </div>
+
+            <!-- Visual Graph Dashboard Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+
+                <!-- Donut Progress Ring Card -->
+                <div class="md:col-span-5 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center space-y-4">
+                    <h4 class="text-xs font-bold text-slate-700">전체 숙제 달성률</h4>
+
+                    <!-- SVG Circular Progress Bar -->
+                    <div class="relative w-40 h-40 flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-slate-100" stroke-width="3.5" stroke="currentColor" fill="none"
+                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path id="progressCircle" class="text-brand-500 transition-all duration-700 ease-out" stroke-dasharray="0, 100" stroke-linecap="round" stroke-width="3.5" stroke="currentColor" fill="none"
+                                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span id="progressPercent" class="text-3xl font-black text-slate-800">0%</span>
+                            <span id="progressSubText" class="text-[10px] text-slate-400 font-medium">0 / 0 완료</span>
+                        </div>
+                    </div>
+
+                    <div class="w-full grid grid-cols-2 gap-2 text-xs pt-2">
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                            <span class="block text-[10px] text-slate-400 font-medium">완료된 숙제</span>
+                            <span id="doneCountText" class="font-bold text-slate-800">0개</span>
+                        </div>
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                            <span class="block text-[10px] text-slate-400 font-medium">남은 숙제</span>
+                            <span id="remainingCountText" class="font-bold text-slate-800">0개</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subject Time Distribution Bar Chart Card -->
+                <div class="md:col-span-7 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-xs font-bold text-slate-700">과목별 필요 소요시간 (분)</h4>
+                        <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-medium">자동 계산</span>
+                    </div>
+
+                    <!-- Dynamic Horizontal Bar Graph -->
+                    <div id="barGraphContainer" class="space-y-3 py-2">
+                        <!-- Items populated via JS -->
+                    </div>
+
+                    <div class="text-[11px] text-slate-400 border-t border-slate-100 pt-3 flex items-center justify-between">
+                        <span>💡 난이도가 높을수록 그래프 길이가 길어집니다.</span>
+                        <span class="font-bold text-slate-600" id="graphTotalHours">총 소요: 0분</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- BGM Status Card & Direct Player -->
+            <div id="bgmControlCard" class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden space-y-4">
+                
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-700/80 pb-4 relative z-10">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span id="bgmUrgencyBadge" class="bg-brand-500 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">🟢 PEACEFUL</span>
+                            <h4 class="text-base font-extrabold tracking-tight">클래식 스마트 오디오 엔진</h4>
+                        </div>
+                        <p id="bgmThemeDesc" class="text-xs text-slate-300 mt-1">잔잔한 호텔 로비 피아노 테마 (안전한 상태)</p>
+                    </div>
+
+                    <!-- Direct Audio Controls -->
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <button id="bgmPlayToggleBtn" onclick="toggleAudioEngine()" 
+                                class="flex-1 sm:flex-none px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-black text-xs rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                            <i id="bgmPlayBtnIcon" class="fa-solid fa-play"></i>
+                            <span id="bgmPlayBtnLabel">음악 재생하기</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BGM Dynamic Indicators -->
+                <div class="grid grid-cols-3 gap-3 text-center relative z-10 text-xs">
+                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
+                        <span class="text-[10px] text-slate-400 block font-medium">연주 템포 (Tempo)</span>
+                        <span id="bgmTempoLabel" class="text-sm font-extrabold text-brand-400 mt-0.5 block">80 BPM</span>
+                    </div>
+                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
+                        <span class="text-[10px] text-slate-400 block font-medium">사운드 볼륨 (Volume)</span>
+                        <span id="bgmVolumeLabel" class="text-sm font-extrabold text-blue-400 mt-0.5 block">35%</span>
+                    </div>
+                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
+                        <span class="text-[10px] text-slate-400 block font-medium">긴급 상태</span>
+                        <span id="bgmStatusLabel" class="text-sm font-extrabold text-emerald-400 mt-0.5 block">여유로움</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Floating Audio Control Dock (Fixed Bottom) -->
+    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-xl bg-slate-900/90 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700/80 flex items-center justify-between z-40">
+        <div class="flex items-center gap-3">
+            <button onclick="toggleAudioEngine()" class="w-10 h-10 bg-brand-500 hover:bg-brand-600 text-white rounded-xl flex items-center justify-center text-sm shadow-md transition">
+                <i id="dockPlayIcon" class="fa-solid fa-play"></i>
+            </button>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span id="dockMusicDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <h5 id="dockTrackName" class="text-xs font-bold text-white">숙-쓱 클래식 BGM: 재생 중지됨</h5>
+                </div>
+                <p id="dockTrackMeta" class="text-[10px] text-slate-400">위급도가 높을수록 더 빠르고 크게 연주됩니다</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button onclick="switchTab(3)" class="text-xs text-brand-400 hover:text-brand-300 font-bold px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700 transition">
+                리포트 <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-400">
+        <div class="max-w-5xl mx-auto px-4 space-y-1">
+            <p class="font-bold text-slate-600">숙-쓱 (Suk-Sseuk) · 168 스마트 공부 플래너</p>
+            <p class="text-[11px]">일주일 168시간을 지배하는 최고의 스마트 클래식 리포트 웹앱</p>
+        </div>
+    </footer>
+
+    <script>
+        // Tasks Memory State
+        let tasks = [];
+
+        let activeTab = 1;
+
+        // Web Audio Synthesizer State
+        let audioCtx = null;
+        let isAudioPlaying = false;
+        let currentLoopId = null;
+        let currentBgmMode = "PEACEFUL"; // PEACEFUL, CAUTION, URGENT
+
+        // Pure Web Audio Synthesizer Engine (100% Reliable in preview/iframes)
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Play Tone Helper
+        function playTone(freq, duration, type = 'sine', gainVal = 0.1) {
+            if (!audioCtx || !isAudioPlaying) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.error("Audio synth error:", e);
+            }
+        }
+
+        // BGM Music Synthesizer Sequences
+        function startBgmEngine() {
+            if (currentLoopId) clearInterval(currentLoopId);
+
+            // Compute current max urgency from tasks
+            updateBgmModeByUrgency();
+
+            let noteIndex = 0;
+
+            if (currentBgmMode === "PEACEFUL") {
+                // Peaceful Lounge Piano Notes (Tempo: 80 BPM, Volume: 35%)
+                const notes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63]; // C4, E4, G4, C5, G4, E4
+                const interval = (60 / 80) * 1000;
+
+                currentLoopId = setInterval(() => {
+                    if (!isAudioPlaying) return;
+                    playTone(notes[noteIndex % notes.length], 0.6, 'sine', 0.15);
+                    noteIndex++;
+                }, interval);
+
+            } else if (currentBgmMode === "CAUTION") {
+                // Grieg - In the Hall of the Mountain King Motif (Tempo: 135 BPM, Volume: 65%)
+                const notes = [220.00, 246.94, 261.63, 293.66, 329.63, 261.63, 329.63]; // A3, B3, C4, D4, E4, C4, E4
+                const interval = (60 / 135) * 1000;
+
+                currentLoopId = setInterval(() => {
+                    if (!isAudioPlaying) return;
+                    playTone(notes[noteIndex % notes.length], 0.35, 'triangle', 0.3);
+                    noteIndex++;
+                }, interval);
+
+            } else if (currentBgmMode === "URGENT") {
+                // Beethoven Symphony No. 5 'Fate' Motif (Tempo: 175 BPM, Volume: 95%)
+                // G G G Eb ... F F F D
+                const fateSeq = [
+                    { f: 392.00, d: 0.15 }, { f: 392.00, d: 0.15 }, { f: 392.00, d: 0.15 }, { f: 311.13, d: 0.6 },
+                    { f: 349.23, d: 0.15 }, { f: 349.23, d: 0.15 }, { f: 349.23, d: 0.15 }, { f: 293.66, d: 0.6 }
+                ];
+                const interval = (60 / 175) * 1000;
+
+                currentLoopId = setInterval(() => {
+                    if (!isAudioPlaying) return;
+                    const item = fateSeq[noteIndex % fateSeq.length];
+                    playTone(item.f, item.d, 'sawtooth', 0.45);
+                    noteIndex++;
+                }, interval);
+            }
+
+            updateBgmUi();
+        }
+
+        function toggleAudioEngine() {
+            initAudioContext();
+            isAudioPlaying = !isAudioPlaying;
+
+            if (isAudioPlaying) {
+                startBgmEngine();
+            } else {
+                if (currentLoopId) clearInterval(currentLoopId);
+                updateBgmUi();
+            }
+        }
+
+        function updateBgmModeByUrgency() {
+            const activeTasks = tasks.filter(t => !t.completed);
+            if (activeTasks.length === 0) {
+                currentBgmMode = "PEACEFUL";
+                return;
+            }
+
+            // Check max urgency score across tasks
+            let maxUrgency = 0;
+            activeTasks.forEach(t => {
+                const score = (t.importance * 1.5) + (t.difficulty * 2);
+                if (score > maxUrgency) maxUrgency = score;
+            });
+
+            if (maxUrgency >= 8.5) {
+                currentBgmMode = "URGENT";
+            } else if (maxUrgency >= 5.5) {
+                currentBgmMode = "CAUTION";
+            } else {
+                currentBgmMode = "PEACEFUL";
+            }
+        }
+
+        function updateBgmUi() {
+            const headerBtn = document.getElementById('headerBgmText');
+            const headerIcon = document.getElementById('headerBgmIcon');
+            const dockIcon = document.getElementById('dockPlayIcon');
+            const dockDot = document.getElementById('dockMusicDot');
+            const dockTrack = document.getElementById('dockTrackName');
+            const bgmBadge = document.getElementById('bgmUrgencyBadge');
+            const bgmDesc = document.getElementById('bgmThemeDesc');
+            const bgmPlayLabel = document.getElementById('bgmPlayBtnLabel');
+            const bgmPlayIcon = document.getElementById('bgmPlayBtnIcon');
+            const tempoLabel = document.getElementById('bgmTempoLabel');
+            const volumeLabel = document.getElementById('bgmVolumeLabel');
+            const statusLabel = document.getElementById('bgmStatusLabel');
+
+            if (isAudioPlaying) {
+                if (headerBtn) headerBtn.textContent = "BGM: 일시정지";
+                if (headerIcon) headerIcon.className = "fa-solid fa-pause text-brand-500 animate-pulse";
+                if (dockIcon) dockIcon.className = "fa-solid fa-pause";
+                if (dockDot) dockDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
+                if (bgmPlayLabel) bgmPlayLabel.textContent = "음악 일시정지";
+                if (bgmPlayIcon) bgmPlayIcon.className = "fa-solid fa-pause";
+            } else {
+                if (headerBtn) headerBtn.textContent = "BGM: 재생하기";
+                if (headerIcon) headerIcon.className = "fa-solid fa-music text-brand-500";
+                if (dockIcon) dockIcon.className = "fa-solid fa-play";
+                if (dockDot) dockDot.className = "w-2 h-2 rounded-full bg-slate-500";
+                if (bgmPlayLabel) bgmPlayLabel.textContent = "음악 재생하기";
+                if (bgmPlayIcon) bgmPlayIcon.className = "fa-solid fa-play";
+            }
+
+            if (currentBgmMode === "PEACEFUL") {
+                if (bgmBadge) { bgmBadge.textContent = "🟢 PEACEFUL"; bgmBadge.className = "bg-emerald-500 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase"; }
+                if (bgmDesc) bgmDesc.textContent = "잔잔한 호텔 로비 피아노 테마 (안전한 상태)";
+                if (tempoLabel) tempoLabel.textContent = "80 BPM (느림)";
+                if (volumeLabel) volumeLabel.textContent = "35% (잔잔함)";
+                if (statusLabel) { statusLabel.textContent = "여유로움"; statusLabel.className = "text-sm font-extrabold text-emerald-400 mt-0.5 block"; }
+                if (dockTrack) dockTrack.textContent = isAudioPlaying ? "BGM: 드뷔시 달빛풍 호텔 로비 연주 중" : "숙-쓱 클래식 BGM: 재생 중지됨";
+            } else if (currentBgmMode === "CAUTION") {
+                if (bgmBadge) { bgmBadge.textContent = "🟡 CAUTION"; bgmBadge.className = "bg-amber-500 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase"; }
+                if (bgmDesc) bgmDesc.textContent = "페르귄트 '마왕의 궁전에서' 긴장조 테마 (보통 상태)";
+                if (tempoLabel) tempoLabel.textContent = "135 BPM (보통)";
+                if (volumeLabel) volumeLabel.textContent = "65% (중간)";
+                if (statusLabel) { statusLabel.textContent = "주의 필요"; statusLabel.className = "text-sm font-extrabold text-amber-400 mt-0.5 block"; }
+                if (dockTrack) dockTrack.textContent = isAudioPlaying ? "BGM: 페르귄트 마왕의 궁전 연주 중" : "숙-쓱 클래식 BGM: 재생 중지됨";
+            } else {
+                if (bgmBadge) { bgmBadge.textContent = "🔴 URGENT"; bgmBadge.className = "bg-red-500 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase danger-pulse"; }
+                if (bgmDesc) bgmDesc.textContent = "베토벤 운명 교향곡 쿵쿵쿵쿵 긴급 테마 (위험 상태)";
+                if (tempoLabel) tempoLabel.textContent = "175 BPM (매우 빠름)";
+                if (volumeLabel) volumeLabel.textContent = "95% (매우 큼)";
+                if (statusLabel) { statusLabel.textContent = "비상 상황!"; statusLabel.className = "text-sm font-extrabold text-red-400 mt-0.5 block"; }
+                if (dockTrack) dockTrack.textContent = isAudioPlaying ? "BGM: 베토벤 운명 교향곡 연주 중" : "숙-쓱 클래식 BGM: 재생 중지됨";
+            }
+        }
+
+        function switchTab(tabNum) {
+            activeTab = tabNum;
+
+            // Hide all pages
+            [1, 2, 3].forEach(n => {
+                const page = document.getElementById(`page${n}`);
+                const btn = document.getElementById(`tabBtn${n}`);
+                const iconBg = document.getElementById(`tabIconBg${n}`);
+                const title = document.getElementById(`tabTitle${n}`);
+                const indicator = document.getElementById(`tabIndicator${n}`);
+
+                if (page) page.classList.add('hidden');
+                if (btn) {
+                    btn.className = "bg-white/80 hover:bg-white border-2 border-slate-200/80 p-4 sm:p-5 rounded-2xl text-left transition-all duration-200 flex sm:flex-col justify-between items-center sm:items-start group relative overflow-hidden";
+                }
+                if (iconBg) iconBg.className = "w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center text-lg font-bold shrink-0 transition";
+                if (title) title.className = "text-base sm:text-lg font-bold text-slate-600";
+                if (indicator) indicator.className = "w-full h-1 bg-transparent rounded-full mt-3";
+            });
+
+            // Activate target page
+            const activePage = document.getElementById(`page${tabNum}`);
+            const activeBtn = document.getElementById(`tabBtn${tabNum}`);
+            const activeIconBg = document.getElementById(`tabIconBg${tabNum}`);
+            const activeTitle = document.getElementById(`tabTitle${tabNum}`);
+            const activeIndicator = document.getElementById(`tabIndicator${tabNum}`);
+
+            if (activePage) activePage.classList.remove('hidden');
+            if (activeBtn) {
+                activeBtn.className = "tab-active bg-white border-2 border-brand-500 p-4 sm:p-5 rounded-2xl text-left transition-all duration-200 flex sm:flex-col justify-between items-center sm:items-start group relative overflow-hidden shadow-lg shadow-brand-500/10";
+            }
+            if (activeIconBg) activeIconBg.className = "w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center text-lg font-bold shrink-0 transition";
+            if (activeTitle) activeTitle.className = "text-base sm:text-lg font-black text-slate-900";
+            if (activeIndicator) activeIndicator.className = "w-full h-1 bg-brand-500 rounded-full mt-3";
+
+            renderAll();
+
+            if (isAudioPlaying) {
+                startBgmEngine();
+            }
+        }
+
+        function handleAddTask(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('taskName');
+            const subjectInput = document.getElementById('taskSubject');
+            const deadlineInput = document.getElementById('taskDeadlineText');
+            const durationInput = document.getElementById('taskDuration');
+            const difficultyInput = document.getElementById('taskDifficulty');
+            const importanceInput = document.getElementById('taskImportance');
+
+            const newTask = {
+                id: Date.now(),
+                name: nameInput.value.trim(),
+                subject: subjectInput.value.trim(),
+                deadlineText: deadlineInput.value.trim() || "자유 마감",
+                duration: parseInt(durationInput.value) || 10,
+                difficulty: parseFloat(difficultyInput.value) || 1.0,
+                importance: parseInt(importanceInput.value) || 3,
+                completed: false
+            };
+
+            tasks.push(newTask);
+
+            // Reset Form
+            nameInput.value = '';
+            subjectInput.value = '';
+            deadlineInput.value = '';
+            durationInput.value = '';
+
+            renderAll();
+
+            if (isAudioPlaying) {
+                startBgmEngine();
+            }
+        }
+
+        function updateRangeLabel(id, val) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const labels = {
+                "1": "1단계 (낮음)",
+                "2": "2단계 (약간낮음)",
+                "3": "3단계 (보통)",
+                "4": "4단계 (높음)",
+                "5": "5단계 (매우높음)"
+            };
+            el.textContent = labels[val] || `${val}단계`;
+        }
+
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                renderAll();
+                if (isAudioPlaying) startBgmEngine();
+            }
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            renderAll();
+            if (isAudioPlaying) startBgmEngine();
+        }
+
+        function clearAllTasks() {
+            if (tasks.length === 0) return;
+            tasks = [];
+            renderAll();
+            if (isAudioPlaying) startBgmEngine();
+        }
+
+        function renderAll() {
+            // Header stats
+            const totalCount = tasks.length;
+            const activeTasks = tasks.filter(t => !t.completed);
+            const completedTasks = tasks.filter(t => t.completed);
+
+            const taskCountEl = document.getElementById('headerTaskCount');
+            if (taskCountEl) taskCountEl.textContent = totalCount;
+
+            const inputCountBadge = document.getElementById('inputCountBadge');
+            if (inputCountBadge) inputCountBadge.textContent = `${totalCount}개`;
+
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            if (analyzeBtn) analyzeBtn.disabled = tasks.length === 0;
+
+            // Render Page 1 List
+            const p1List = document.getElementById('p1TaskList');
+            const p1Empty = document.getElementById('p1EmptyState');
+
+            if (p1List && p1Empty) {
+                if (tasks.length === 0) {
+                    p1List.innerHTML = '';
+                    p1Empty.classList.remove('hidden');
+                } else {
+                    p1Empty.classList.add('hidden');
+                    p1List.innerHTML = tasks.map(t => {
+                        const adjustedMin = Math.round(t.duration * t.difficulty);
+                        return `
+                            <div class="p-3 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200 transition flex items-center justify-between gap-3 ${t.completed ? 'opacity-50 line-through' : ''}">
+                                <div class="flex items-center gap-3 overflow-hidden">
+                                    <input type="checkbox" ${t.completed ? 'checked' : ''} onclick="toggleTask(${t.id})" 
+                                           class="w-4 h-4 text-brand-500 rounded border-slate-300 focus:ring-brand-500 cursor-pointer">
+                                    <div class="truncate">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs font-black text-slate-800 truncate">${escapeHtml(t.name)}</span>
+                                            <span class="text-[10px] bg-brand-50 text-brand-700 font-bold px-2 py-0.5 rounded-md border border-brand-100">${escapeHtml(t.subject)}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                                            <span><i class="fa-regular fa-clock"></i> ${escapeHtml(t.deadlineText)}</span>
+                                            <span>•</span>
+                                            <span>예상: ${t.duration}분 (보정: ${adjustedMin}분)</span>
+                                            <span>•</span>
+                                            <span>중요도 ${t.importance}단계</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onclick="deleteTask(${t.id})" class="text-slate-400 hover:text-red-500 p-1.5 transition">
+                                    <i class="fa-solid fa-xmark text-sm"></i>
+                                </button>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // Calculate Priority Scores for Page 2
+            const ranked = [...tasks].map(t => {
+                const adjustedTime = Math.round(t.duration * t.difficulty);
+                const priorityScore = (t.importance * 20) + (t.difficulty * 15) - (t.completed ? 1000 : 0);
+                return { ...t, adjustedTime, priorityScore };
+            }).sort((a, b) => b.priorityScore - a.priorityScore);
+
+            // Page 2 Stats
+            const resTotalCount = document.getElementById('resTotalCount');
+            if (resTotalCount) resTotalCount.textContent = `${activeTasks.length}개`;
+
+            const totalTimeMinutes = activeTasks.reduce((acc, curr) => acc + Math.round(curr.duration * curr.difficulty), 0);
+            const resTotalTime = document.getElementById('resTotalTime');
+            if (resTotalTime) resTotalTime.textContent = `${totalTimeMinutes}분`;
+
+            const urgentCount = activeTasks.filter(t => t.importance >= 4 || t.difficulty >= 1.3).length;
+            const resUrgentCount = document.getElementById('resUrgentCount');
+            if (resUrgentCount) resUrgentCount.textContent = `${urgentCount}개`;
+
+            // Page 2 Priority Cards
+            const priorityList = document.getElementById('priorityTaskList');
+            if (priorityList) {
+                if (tasks.length === 0) {
+                    priorityList.innerHTML = `<div class="bg-white rounded-2xl p-8 text-center text-slate-400 text-xs">등록된 숙제가 없습니다. 1단계에서 숙제를 먼저 추가해주세요.</div>`;
+                } else {
+                    priorityList.innerHTML = ranked.map((t, index) => {
+                        const rankLabel = index === 0 ? "1순위 (최우선)" : index === 1 ? "2순위 (우선)" : index === 2 ? "3순위 (보통)" : `${index + 1}순위`;
+                        const badgeColor = index === 0 ? "bg-red-500 text-white" : index === 1 ? "bg-amber-500 text-white" : "bg-brand-500 text-white";
+                        
+                        return `
+                            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm transition space-y-3 ${t.completed ? 'opacity-60 bg-slate-50' : ''}">
+                                <div class="flex justify-between items-start gap-3">
+                                    <div class="flex items-center gap-2.5">
+                                        <span class="${badgeColor} text-xs font-black px-3 py-1 rounded-xl shadow-sm">${rankLabel}</span>
+                                        <h4 class="font-extrabold text-sm text-slate-900 ${t.completed ? 'line-through' : ''}">${escapeHtml(t.name)}</h4>
+                                    </div>
+                                    <button onclick="toggleTask(${t.id})" class="text-xs px-3 py-1.5 rounded-xl border ${t.completed ? 'bg-slate-200 text-slate-600 border-slate-300' : 'bg-brand-50 text-brand-700 border-brand-200 font-bold'}">
+                                        ${t.completed ? '완료됨 ✓' : '완료 처리'}
+                                    </button>
+                                </div>
+
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-1">
+                                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                        <span class="text-[10px] text-slate-400 block font-medium">학원 / 과목</span>
+                                        <span class="font-bold text-slate-700">${escapeHtml(t.subject)}</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                        <span class="text-[10px] text-slate-400 block font-medium">마감 시간</span>
+                                        <span class="font-bold text-slate-700">${escapeHtml(t.deadlineText)}</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                        <span class="text-[10px] text-slate-400 block font-medium">추천 투자시간</span>
+                                        <span class="font-bold text-brand-600">${t.adjustedTime}분 (난이도 보정)</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                        <span class="text-[10px] text-slate-400 block font-medium">중요도 / 엄격도</span>
+                                        <span class="font-bold text-amber-600">${t.importance}단계</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // Page 3 Visual Graph Report
+            const doneCount = completedTasks.length;
+            const remCount = activeTasks.length;
+            const percent = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+
+            const progressCircle = document.getElementById('progressCircle');
+            if (progressCircle) {
+                progressCircle.setAttribute('stroke-dasharray', `${percent}, 100`);
+            }
+
+            const progressPercent = document.getElementById('progressPercent');
+            if (progressPercent) progressPercent.textContent = `${percent}%`;
+
+            const progressSubText = document.getElementById('progressSubText');
+            if (progressSubText) progressSubText.textContent = `${doneCount} / ${totalCount} 완료`;
+
+            const doneCountText = document.getElementById('doneCountText');
+            if (doneCountText) doneCountText.textContent = `${doneCount}개`;
+
+            const remainingCountText = document.getElementById('remainingCountText');
+            if (remainingCountText) remainingCountText.textContent = `${remCount}개`;
+
+            // Subject Bar Graph Container
+            const barContainer = document.getElementById('barGraphContainer');
+            if (barContainer) {
+                if (tasks.length === 0) {
+                    barContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">등록된 숙제가 없어 그래프를 생성할 수 없습니다.</p>`;
+                } else {
+                    const maxTime = Math.max(...tasks.map(t => Math.round(t.duration * t.difficulty)), 1);
+                    barContainer.innerHTML = tasks.map(t => {
+                        const adjTime = Math.round(t.duration * t.difficulty);
+                        const widthPct = Math.min(Math.round((adjTime / maxTime) * 100), 100);
+                        const barBg = t.completed ? "bg-slate-300" : t.importance >= 4 ? "bg-amber-500" : "bg-brand-500";
+
+                        return `
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-xs font-bold">
+                                    <span class="text-slate-800 ${t.completed ? 'line-through text-slate-400' : ''}">${escapeHtml(t.name)} (${escapeHtml(t.subject)})</span>
+                                    <span class="text-slate-600">${adjTime}분</span>
+                                </div>
+                                <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                                    <div class="h-full ${barBg} transition-all duration-500 rounded-full" style="width: ${widthPct}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            const graphTotalHours = document.getElementById('graphTotalHours');
+            if (graphTotalHours) graphTotalHours.textContent = `총 필요 소요시간: ${totalTimeMinutes}분`;
+
+            updateBgmModeByUrgency();
+            updateBgmUi();
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        window.onload = function() {
+            renderAll();
+        };
+    </script>
+</body>
+</html>
